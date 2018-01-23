@@ -342,16 +342,78 @@ namespace Eval
 		// 評価値の合計
 		EvalSum sum;
 
+		// KK
+		sum.p[2] = kk[sq_bk][sq_wk];
+#if defined (USE_AVX2)
+		sum.p[0][0] = sum.p[0][1] = sum.p[1][0] = sum.p[1][1] = 0;
 
+		__m256i zero = _mm256_setzero_si256();
+		__m256i sum0 = zero;
+		__m256i sum1 = zero;
+
+		#pragma unroll
+		for (i = 0; i < length ; ++i) {
+			k0 = list_fb[i];
+			k1 = list_fw[i];
+			const auto* pkppb = ppkppb[k0];
+			const auto* pkppw = ppkppw[k1];
+			int j = 0;
+			for (; j + 8 < i; j += 8) {
+				// listから8要素ロードする
+				__m256i indexes0  = _mm256_stream_load_si256(reinterpret_cast<const __m256i*>(&list_fb[j]));
+				__m256i indexes1  = _mm256_stream_load_si256(reinterpret_cast<const __m256i*>(&list_fw[j]));
+			// indexesのオフセットに従い8要素ギャザーする
+				__m256i w0 = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pkppb), indexes0, 4);
+				__m256i w1 = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pkppw), indexes1, 4);
+				// 下位128ビットを16ビット整数→32ビット整数に変換する
+				__m256i w0lo = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(w0, 0));
+				__m256i w1lo = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(w1, 0));
+				// 上位128ビットを16ビット整数→32ビット整数に変換する
+				__m256i w1hi = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(w1, 1));
+				__m256i w0hi = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(w0, 1));
+				// 足し合わせる
+				sum0 = _mm256_add_epi32(sum0, w0lo);
+				sum0 = _mm256_add_epi32(sum0, w0hi);
+				sum1 = _mm256_add_epi32(sum1, w1lo);
+				sum1 = _mm256_add_epi32(sum1, w1hi);
+			}
+			for (; j + 4 < i; j += 4) {
+				// listから4要素ロードする
+				__m128i indexes0 = _mm_stream_load_si128(reinterpret_cast<__m128i*>(&list_fb[j]));
+				__m128i indexes1 = _mm_stream_load_si128(reinterpret_cast<__m128i*>(&list_fw[j]));
+				// indexesのオフセットに従いギャザーする
+				__m128i w0 = _mm_i32gather_epi32(reinterpret_cast<const int*>(pkppb), indexes0, 4);
+				__m128i w1 = _mm_i32gather_epi32(reinterpret_cast<const int*>(pkppw), indexes1, 4);
+				// 16ビット整数→32ビット整数に変換する
+				// 足し合わせる
+				sum0 = _mm256_add_epi32(sum0, _mm256_cvtepi16_epi32(w0));
+				sum1 = _mm256_add_epi32(sum1, _mm256_cvtepi16_epi32(w1));
+			}
+			for (; j < i; ++j) {
+				sum.p[0] += pkppb[list_fb[j]];
+				sum.p[1] += pkppw[list_fw[j]];
+			}
+			// KKP
+			sum.p[2] += kkp[sq_bk][sq_wk][k0];
+		}
+		sum0 = _mm256_add_epi32(sum0, _mm256_srli_si256(sum0, 8));
+		__m128i sum0_128 = _mm_add_epi32(_mm256_extracti128_si256(sum0, 0), _mm256_extracti128_si256(sum0, 1));
+		std::array<int32_t, 2> sum0_array;
+		_mm_storel_epi64(reinterpret_cast<__m128i*>(&sum0_array), sum0_128);
+		sum.p[0] += sum0_array;
+
+		sum1 = _mm256_add_epi32(sum1, _mm256_srli_si256(sum1, 8));
+		__m128i sum1_128 = _mm_add_epi32(_mm256_extracti128_si256(sum1, 0), _mm256_extracti128_si256(sum1, 1));
+		std::array<int32_t, 2> sum1_array;
+		_mm_storel_epi64(reinterpret_cast<__m128i*>(&sum1_array), sum1_128);
+		sum.p[1] += sum1_array;
+#else
 #if defined(USE_SSE2)
 		// sum.p[0](BKPP)とsum.p[1](WKPP)をゼロクリア
 		sum.m[0] = _mm_setzero_si128();
 #else
 		sum.p[0][0] = sum.p[0][1] = sum.p[1][0] = sum.p[1][1] = 0;
 #endif
-
-		// KK
-		sum.p[2] = kk[sq_bk][sq_wk];
 
 		for (i = 0; i < length ; ++i)
 		{
@@ -384,6 +446,7 @@ namespace Eval
 			sum.p[2] += kkp[sq_bk][sq_wk][k0];
 		}
 
+#endif
 		auto st = pos.state();
 		sum.p[2][0] += st->materialValue * FV_SCALE;
 
@@ -470,8 +533,8 @@ namespace Eval
 
 		for (int i = 0; i < length ; i += 8)
 		{
-			__m256i indexes0 = _mm256_load_si256(reinterpret_cast<const __m256i*>(&list0[i]));
-			__m256i indexes1 = _mm256_load_si256(reinterpret_cast<const __m256i*>(&list1[i]));
+			__m256i indexes0 = _mm256_stream_load_si256(reinterpret_cast<const __m256i*>(&list0[i]));
+			__m256i indexes1 = _mm256_stream_load_si256(reinterpret_cast<const __m256i*>(&list1[i]));
 			__m256i w0 = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pkppb), indexes0, 4);
 			__m256i w1 = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pkppw), indexes1, 4);
 
@@ -620,7 +683,7 @@ namespace Eval
 					for (; j + 8 < i; j += 8)
 					{
 						// list1[j]から8要素ロードする
-						__m256i indexes = _mm256_load_si256(reinterpret_cast<const __m256i*>(&list1[j]));
+						__m256i indexes = _mm256_stream_load_si256(reinterpret_cast<const __m256i*>(&list1[j]));
 						// indexesのオフセットに従い、pkppwから8要素ギャザーする
 						__m256i w = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pkppw), indexes, 4);
 						// 下位128ビットを16ビット整数→32ビット整数に変換する
@@ -635,7 +698,7 @@ namespace Eval
 
 					for (; j + 4 < i; j += 4) {
 						// list1[j]から4要素ロードする
-						__m128i indexes = _mm_load_si128(reinterpret_cast<const __m128i*>(&list1[j]));
+						__m128i indexes = _mm_stream_load_si128(reinterpret_cast<__m128i*>(&list1[j]));
 						// indexesのオフセットに従い、pkppwから4要素ギャザーする
 						__m128i w = _mm_i32gather_epi32(reinterpret_cast<const int*>(pkppw), indexes, 4);
 						// 16ビット整数→32ビット整数に変換する
@@ -715,7 +778,7 @@ namespace Eval
 					for (; j + 8 < i; j += 8)
 					{
 						// list0[j]から8要素ロードする
-						__m256i indexes = _mm256_load_si256(reinterpret_cast<const __m256i*>(&list0[j]));
+						__m256i indexes = _mm256_stream_load_si256(reinterpret_cast<const __m256i*>(&list0[j]));
 						// indexesのオフセットに従い、pkppwから8要素ギャザーする
 						__m256i w = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pkppb), indexes, 4);
 						// 下位128ビットを16ビット整数→32ビット整数に変換する
@@ -730,7 +793,7 @@ namespace Eval
 
 					for (; j + 4 < i; j += 4) {
 						// list0[j]から4要素ロードする
-						__m128i indexes = _mm_load_si128(reinterpret_cast<const __m128i*>(&list0[j]));
+						__m128i indexes = _mm_stream_load_si128(reinterpret_cast<__m128i*>(&list0[j]));
 						// indexesのオフセットに従い、pkppwから4要素ギャザーする
 						__m128i w = _mm_i32gather_epi32(reinterpret_cast<const int*>(pkppb), indexes, 4);
 						// 16ビット整数→32ビット整数に変換する
