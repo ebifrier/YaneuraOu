@@ -257,6 +257,10 @@ int main(int argc, char* argv[])
 			Options["Login_Name"] << USI::Option(loginName);
 			if (argc > 4) {
 				Options["Threads"] = argv[4];
+				// 1スレの時はテストとみなして共有メモリがデフォ
+				if(1 == (size_t)Options["Threads"]){
+					Options["EvalShare"] << USI::Option(true);
+				}
 			}
 
 			IsGodwhaleMode = true;

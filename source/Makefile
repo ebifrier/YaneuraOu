@@ -10,7 +10,7 @@ YANEURAOU_EDITION = YANEURAOU_2018_OTAFUKU_ENGINE
 COMPILER = clang++
 
 # 標準的なコンパイルオプション
-CFLAGS   = -std=c++14 -fno-exceptions -fno-rtti -Wextra -Ofast -MMD -MP -fpermissive
+CFLAGS   = -std=c++14 -fno-exceptions -frtti -Wextra -Ofast -MMD -MP -fpermissive
 WCFLAGS  =
 LDFLAGS  =
 LIBS     =

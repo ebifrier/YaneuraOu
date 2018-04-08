@@ -391,12 +391,18 @@ namespace USI
 		// 評価関数フォルダ。これを変更したとき、評価関数を次のisreadyタイミングで読み直す必要がある。
 		o["EvalDir"] << Option("eval", [](const USI::Option&o) { load_eval_finished = false; });
 
+#if defined(GODWHALE_CLUSTER_SLAVE)
+		// 評価関数パラメーターを共有するか
+		// デフォルトでオフにする。
+		o["EvalShare"] << Option(false);
+#else
 #if defined (USE_SHARED_MEMORY_IN_EVAL) && defined(_WIN32) && \
 	 (defined(EVAL_KPPT) || defined(EVAL_KPP_KKPT) || defined(EVAL_KPPPT) || defined(EVAL_KPPP_KKPT) || defined(EVAL_KKPP_KKPT) || \
 	defined(EVAL_KPP_KKPT_FV_VAR) || defined(EVAL_KKPPT) ||defined(EVAL_EXPERIMENTAL) || defined(EVAL_HELICES) || defined(EVAL_NABLA) )
 		// 評価関数パラメーターを共有するか
 		// 異種評価関数との自己対局のときにこの設定で引っかかる人が後を絶たないのでデフォルトでオフにする。
 		o["EvalShare"] << Option(false);
+#endif
 #endif
 
 #if defined(LOCAL_GAME_SERVER)

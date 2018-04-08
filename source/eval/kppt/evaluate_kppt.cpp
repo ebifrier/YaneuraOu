@@ -36,6 +36,13 @@
 #include <windows.h>
 #endif
 
+#if defined(GODWHALE_CLUSTER_SLAVE)
+#include <boost/interprocess/managed_mapped_file.hpp>
+namespace ipc = boost::interprocess;
+static ipc::file_mapping mappedFile[3];
+static ipc::mapped_region mappedRegion[3];
+#endif
+
 #if defined(EVAL_LEARN)
 #include "../../learn/learning_tools.h"
 using namespace EvalLearningTools;
@@ -287,6 +294,28 @@ namespace Eval
 	// load_eval_impl()を呼び出すだけで良い。
 	void load_eval()
 	{
+#if defined(GODWHALE_CLUSTER_SLAVE)
+		// 評価関数を共有するのか
+		if ((bool)Options["EvalShare"])
+		{
+			auto make_name = [&](std::string filename) { return path_combine((string)Options["EvalDir"], filename); };
+			mappedFile[0] = ipc::file_mapping(make_name(KK_BIN).c_str(), ipc::read_only);
+			mappedFile[1] = ipc::file_mapping(make_name(KKP_BIN).c_str(), ipc::read_only);
+			mappedFile[2] = ipc::file_mapping(make_name(KPP_BIN).c_str(), ipc::read_only);
+
+			mappedRegion[0] = ipc::mapped_region(mappedFile[0], ipc::read_only);
+			mappedRegion[1] = ipc::mapped_region(mappedFile[1], ipc::read_only);
+			mappedRegion[2] = ipc::mapped_region(mappedFile[2], ipc::read_only);
+
+			kk_  = (ValueKk(*)[SQ_NB][SQ_NB]) mappedRegion[0].get_address();
+			kkp_ = (ValueKkp(*)[SQ_NB][SQ_NB][fe_end])  mappedRegion[1].get_address();
+			kpp_ = (ValueKpp(*)[SQ_NB][fe_end][fe_end]) mappedRegion[2].get_address();
+
+			sync_cout << "info string use shared eval memory." << sync_endl;
+			return;
+		}
+#endif
+
 		eval_malloc();
 		load_eval_impl();
 	}
