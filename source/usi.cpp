@@ -145,7 +145,6 @@ namespace USI
 		size_t multiPV = std::min((size_t)Options["MultiPV"], rootMoves.size());
 
 		uint64_t nodes_searched = Threads.nodes_searched();
-		const int outarraypvlimit = (int)Options["OutArrayPVLimit"];
 
 		// MultiPVでは上位N個の候補手と読み筋を出力する必要がある。
 		for (size_t i = 0; i < multiPV; ++i)
@@ -177,6 +176,7 @@ namespace USI
                 << (IsGodwhaleMode ? " id " + std::to_string(pos.id) : "")
 #endif
 				<< " depth "    << d
+				<< " depth "    << d / ONE_PLY
 				<< " seldepth " << rootMoves[i].selDepth
 				<< " score "    << USI::score_to_usi(v);
 
@@ -200,12 +200,10 @@ namespace USI
 
 
 			// PV配列からPVを出力する。
-			auto out_array_pv = [&](int limit)
+			auto out_array_pv = [&]()
 			{
-				for (Move m : rootMoves[i].pv){
-					if(limit-- <= 0) break;
+				for (Move m : rootMoves[i].pv)
 					ss << " " << m;
-				}
 			};
 
 			// 置換表からPVをかき集めてきてPVを出力する。
@@ -287,14 +285,14 @@ namespace USI
 			if (Search::Limits.consideration_mode)
 				out_tt_pv();
 			else
-				out_array_pv(outarraypvlimit);
+				out_array_pv();
 
 #else
 			// 置換表からPVを出力するモード。
 			// ただし、probe()するとTTEntryのgenerationが変わるので探索に影響する。
 			// benchコマンド時、これはまずいのでbenchコマンド時にはこのモードをオフにする。
 			if (Search::Limits.bench)
-				out_array_pv(outarraypvlimit);
+				out_array_pv();
 			else
 				out_tt_pv();
 
@@ -333,7 +331,7 @@ namespace USI
 		// ゆえにGUIでの対局設定は無視して、思考エンジンの設定ダイアログのところで
 		// 個別設定が出来るようにする。
 
-		o["Hash"] << Option(16, 1, MaxHashMB, [](const Option&o) { TT.resize(o); });
+		o["Hash"] << Option(1024, 1, MaxHashMB, [](const Option&o) { TT.resize(o); });
 
 		// その局面での上位N個の候補手を調べる機能
 		o["MultiPV"] << Option(1, 1, 800);
@@ -344,20 +342,20 @@ namespace USI
 		// ネットワークの平均遅延時間[ms]
 		// この時間だけ早めに指せばだいたい間に合う。
 		// 切れ負けの瞬間は、NetworkDelayのほうなので大丈夫。
-		o["NetworkDelay"] << Option(120, 0, 10000);
+		o["NetworkDelay"] << Option(0, 0, 10000);
 
 		// ネットワークの最大遅延時間[ms]
 		// 切れ負けの瞬間だけはこの時間だけ早めに指す。
 		// 1.2秒ほど早く指さないとfloodgateで切れ負けしかねない。
-		o["NetworkDelay2"] << Option(1120, 0, 10000);
+		o["NetworkDelay2"] << Option(0, 0, 10000);
 
 		// 最小思考時間[ms]
-		o["MinimumThinkingTime"] << Option(2000, 1000, 100000);
+		o["MinimumThinkingTime"] << Option(1000, 1000, 100000);
 
 		// 切れ負けのときの思考時間を調整する。序盤重視率。百分率になっている。
 		// 例えば200を指定すると本来の最適時間の200%(2倍)思考するようになる。
 		// 対人のときに短めに設定して強制的に早指しにすることが出来る。
-		o["SlowMover"] << Option(100, 1, 1000);
+		o["SlowMover"] << Option(80, 1, 1000);
 
 		// 引き分けまでの最大手数。256手ルールのときに256を設定すると良い。
 		// 0なら無制限。(桁あふれすると良くないので内部的には100000として扱う)
@@ -377,7 +375,7 @@ namespace USI
 		//  int contempt = Options["Contempt"] * PawnValue / 100; でPawnValueが100より小さいので
 		// 1だと切り捨てられてしまうからである。
 
-		o["Contempt"] << Option(2, -30000, 30000);
+		o["Contempt"] << Option(9999, -30000, 30000);
 
 		// Contemptの設定値を先手番から見た値とするオプション。Stockfishからの独自拡張。
 		// 先手のときは千日手を狙いたくなくて、後手のときは千日手を狙いたいような場合、
@@ -402,11 +400,6 @@ namespace USI
 		o["EvalShare"] << Option(false);
 #endif
 
-// USE_SHARED_MEMORY_IN_EVAL && Linux Native
-#if defined(USE_SHARED_MEMORY_IN_EVAL) && !defined(_WIN32) && !defined(USE_MSYS2)
-		o["EvalShare"] << Option(false);
-#endif
-
 #if defined(LOCAL_GAME_SERVER)
 		// 子プロセスでEngineを実行するプロセッサグループ(Numa node)
 		// -1なら、指定なし。
@@ -421,8 +414,6 @@ namespace USI
 		// test evalconvertコマンドを叩く。
 		o["SkipLoadingEval"] << Option(false);
 #endif
-		// 読み筋の出力調整値
-		o["OutArrayPVLimit"] << Option(100, 0, 100);
 
 		// 各エンジンがOptionを追加したいだろうから、コールバックする。
 		USI::extra_option(o);
@@ -462,8 +453,8 @@ namespace USI
 					const Option& o = it.second;
 					os << "option name " << it.first << " type " << o.type;
 
-                    if (o.type != "button")
-                        os << " default " << o.currentValue;
+					if (o.type != "button")
+						os << " default " << o.defaultValue;
 
 					// コンボボックス
 					if (o.list.size())
@@ -512,8 +503,8 @@ void is_ready(bool skipCorruptCheck)
                          "please download new one." << sync_endl;
         }
 #endif
-
 		load_eval_finished = true;
+
 	}
 	else
 	{
@@ -741,7 +732,7 @@ void go_cmd(const Position& pos, istringstream& is , StateListPtr& states) {
 			if (token == "infinite")
 				limits.mate = INT32_MAX;
 			else
-				is >> limits.mate;
+				limits.mate = stoi(token);;
 		}
 
 		// 時間無制限。

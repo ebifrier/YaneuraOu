@@ -1,32 +1,30 @@
-﻿#ifndef _CONFIG_H_
+#ifndef _CONFIG_H_
 #define _CONFIG_H_
 
 // --------------------
-// コンパイル時設定
+// �R���p�C�����ݒ�
 // --------------------
 
-// --- ターゲットCPUの選択
+// --- �^�[�Q�b�gCPU�̑I��
 
 #if !defined(USE_MAKEFILE)
 
-// USE_AVX512 : AVX-512(サーバー向けSkylake以降)でサポートされた命令を使うか。
-// USE_AVX2   : AVX2(Haswell以降)でサポートされた命令を使うか。pextなど。
-// USE_SSE42  : SSE4.2でサポートされた命令を使うか。popcnt命令など。
-// USE_SSE41  : SSE4.1でサポートされた命令を使うか。_mm_testz_si128など。
-// USE_SSE2   : SSE2  でサポートされた命令を使うか。
-// NO_SSE     : SSEは使用しない。
-// (Windowsの64bit環境だと自動的にSSE2は使えるはず)
-// noSSE ⊂ SSE2 ⊂ SSE4.1 ⊂ SSE4.2 ⊂ AVX2 ⊂  AVX-512
+// USE_AVX512 : AVX-512(�T�[�o�[����Skylake�ȍ~)�ŃT�|�[�g���ꂽ���߂��g�����B
+// USE_AVX2   : AVX2(Haswell�ȍ~)�ŃT�|�[�g���ꂽ���߂��g�����Bpext�ȂǁB
+// USE_SSE42  : SSE4.2�ŃT�|�[�g���ꂽ���߂��g�����Bpopcnt���߂ȂǁB
+// USE_SSE41  : SSE4.1�ŃT�|�[�g���ꂽ���߂��g�����B_mm_testz_si128�ȂǁB
+// USE_SSE2   : SSE2  �ŃT�|�[�g���ꂽ���߂��g�����B
+// NO_SSE     : SSE�͎g�p���Ȃ��B
+// (Windows��64bit�����Ǝ����I��SSE2�͎g����͂�)
+// noSSE �� SSE2 �� SSE4.1 �� SSE4.2 �� AVX2 ��  AVX-512
 
-// Visual Studioのプロジェクト設定で「構成のプロパティ」→「C / C++」→「コード生成」→「拡張命令セットを有効にする」
-// のところの設定の変更も忘れずに。
+// Visual Studio�̃v���W�F�N�g�ݒ�Łu�\���̃v���p�e�B�v���uC / C++�v���u�R�[�h�����v���u�g�����߃Z�b�g��L���ɂ���v
+// �̂Ƃ���̐ݒ�̕ύX���Y�ꂸ�ɁB
 
-// ターゲットCPUのところだけdefineしてください。(残りは自動的にdefineされます。)
+// �^�[�Q�b�gCPU�̂Ƃ��낾��define���Ă��������B(�c��͎����I��define����܂��B)
 
 //#define USE_AVX512
-#ifndef USE_CMAKE
 #define USE_AVX2
-#endif
 //#define USE_SSE42
 //#define USE_SSE41
 //#define USE_SSE2
@@ -34,198 +32,204 @@
 
 #else
 
-// Makefileを使ってbuildするときは、
+// Makefile���g����build����Ƃ��́A
 // $ make avx2
-// のようにしてビルドすれば自動的にAVX2用がビルドされます。
+// �̂悤�ɂ��ăr���h����Ύ����I��AVX2�p���r���h����܂��B
 
 #endif
 
 
-// 通例hash keyは64bitだが、これを128にするとPosition::state()->long_key()から128bit hash keyが
-// 得られるようになる。研究時に局面が厳密に合致しているかどうかを判定したいときなどに用いる。
-// 実験用の機能なので、128bit,256bitのhash keyのサポートはAVX2のみ。
+// �ʗ�hash key��64bit�����A�����128�ɂ����Position::state()->long_key()����128bit hash key��
+// ������悤�ɂȂ�B�������ɋǖʂ������ɍ��v���Ă��邩�ǂ����𔻒肵�����Ƃ��Ȃǂɗp����B
+// �����p�̋@�\�Ȃ̂ŁA128bit,256bit��hash key�̃T�|�[�g��AVX2�̂݁B
 #define HASH_KEY_BITS 64
 //#define HASH_KEY_BITS 128
 //#define HASH_KEY_BITS 256
 
 
-// 通常探索時の最大探索深さ
+// �ʏ�T�����̍ő�T���[��
 #define MAX_PLY_NUM 127
 
-// --- デバッグ時の標準出力への局面表示などに日本語文字列を用いる。
+// --- �f�o�b�O���̕W���o�͂ւ̋ǖʕ\���Ȃǂɓ��{�ꕶ�����p����B
 
 #define PRETTY_JP
 
 //
-// 以下、デフォルトではdefineしていないので、必要に応じてdefineすること。
+// �ȉ��A�f�t�H���g�ł�define���Ă��Ȃ��̂ŁA�K�v�ɉ�����define���邱�ƁB
 //
 
-// --- assertのレベルを6段階で。
-//  ASSERT_LV 0 : assertなし(全体的な処理が速い)
-//  ASSERT_LV 1 : 軽量なassert
-//  　　　…
-//  ASSERT_LV 5 : 重度のassert(全体的な処理が遅い)
-// あまり重度のassertにすると、探索性能が落ちるので時間当たりに調べられる局面数が低下するから
-// そのへんのバランスをユーザーが決めれるようにこの仕組みを導入。
+// --- assert�̃��x����6�i�K�ŁB
+//  ASSERT_LV 0 : assert�Ȃ�(�S�̓I�ȏ���������)
+//  ASSERT_LV 1 : �y�ʂ�assert
+//  �@�@�@�c
+//  ASSERT_LV 5 : �d�x��assert(�S�̓I�ȏ������x��)
+// ���܂�d�x��assert�ɂ���ƁA�T�����\��������̂Ŏ��ԓ�����ɒ��ׂ���ǖʐ����ቺ���邩��
+// ���̂ւ�̃o�����X�����[�U�[�����߂��悤�ɂ��̎d�g�݂𓱓��B
 
 //#define ASSERT_LV 3
 
-// --- ASSERTのリダイレクト
-// ASSERTに引っかかったときに、それを"Error : x=1"のように標準出力に出力する。
+// --- ASSERT�̃��_�C���N�g
+// ASSERT�Ɉ������������Ƃ��ɁA�����"Error : x=1"�̂悤�ɕW���o�͂ɏo�͂���B
 
 //#define USE_DEBUG_ASSERT
 
 
-// --- USI拡張コマンドの"test"コマンドを有効にする。
-// 非常にたくさんのテストコードが書かれているのでコードサイズが膨らむため、
-// 思考エンジンとしてリリースするときはコメントアウトしたほうがいいと思う。
+// --- USI�g���R�}���h��"test"�R�}���h��L���ɂ���B
+// ���ɂ�������̃e�X�g�R�[�h��������Ă���̂ŃR�[�h�T�C�Y���c��ނ��߁A
+// �v�l�G���W���Ƃ��ă����[�X����Ƃ��̓R�����g�A�E�g�����ق��������Ǝv���B
 
 //#define ENABLE_TEST_CMD
 
-// --- StateInfoに直前の指し手、移動させた駒などの情報を保存しておくのか
-// これが保存されていると詰将棋ルーチンなどを自作する場合においてそこまでの手順を表示するのが簡単になる。
-// (Position::moves_from_start_pretty()などにより、わかりやすい手順が得られる。
-// ただし通常探索においてはやや遅くなるので思考エンジンとしてリリースするときには無効にしておくこと。
+// --- StateInfo�ɒ��O�̎w����A�ړ���������Ȃǂ̏���ۑ����Ă����̂�
+// ���ꂪ�ۑ�����Ă���Ƌl�������[�`���Ȃǂ����삷��ꍇ�ɂ����Ă����܂ł̎菇��\������̂��ȒP�ɂȂ�B
+// (Position::moves_from_start_pretty()�Ȃǂɂ��A�킩��₷���菇��������B
+// �������ʏ�T���ɂ����Ă͂��x���Ȃ�̂Ŏv�l�G���W���Ƃ��ă����[�X����Ƃ��ɂ͖����ɂ��Ă������ƁB
 
 //#define KEEP_LAST_MOVE
 
-// 協力詰め用思考エンジンなどで評価関数を使わないときにまで評価関数用のテーブルを
-// 確保するのはもったいないので、そのテーブルを確保するかどうかを選択するためのオプション。
-// 評価関数を用いるなら、どれか一つを選択すべし。
+// ���͋l�ߗp�v�l�G���W���Ȃǂŕ]���֐����g��Ȃ��Ƃ��ɂ܂ŕ]���֐��p�̃e�[�u����
+// �m�ۂ���̂͂��������Ȃ��̂ŁA���̃e�[�u�����m�ۂ��邩�ǂ�����I�����邽�߂̃I�v�V�����B
+// �]���֐���p����Ȃ�A�ǂꂩ���I�����ׂ��B
 
-// 「○」がついているもの..実装済み
-// 「△」がついているもの..参考実装。
-// 「×」がついているもの..実装予定なし
-// 「？」がついているもの..実装するかも
-// 「！」がついているもの..かつて実装していたがサポートを終了したもの。
+// �u���v�����Ă������..�����ς�
+// �u���v�����Ă������..�Q�l�����B
+// �u�~�v�����Ă������..�����\��Ȃ�
+// �u�H�v�����Ă������..�������邩��
+// �u�I�v�����Ă������..���Ď������Ă������T�|�[�g���I���������́B
 
-// #define EVAL_NO_USE    // ！　評価関数なし。※4
-// #define EVAL_MATERIAL  // ○  駒得のみの評価関数
-// #define EVAL_PP        // ×  ツツカナ型 2駒関係(開発予定なし)
-// #define EVAL_KPP       // ！  Bonanza型 3駒関係、手番なし
-// #define EVAL_KPPT      // ○  Bonanza型 3駒関係、手番つき(Apery WCSC26相当)
-// #define EVAL_KPP_KKPT  // ○  KK手番あり + KKP手番あり + KPP手番なし(Ponanza WCSC26相当？)
-// #define EVAL_KPP_KKPT_FV_VAR // ○ KPP_KKPTと同一。※5
-// #define EVAL_KPP_PPT   // ×  PP手番あり + KKP手番あり + KPP手番なし(実装、途中まで)※1
-// #define EVAL_KPPP_KKPT // △  KKP手番あり + KPP手番なし + KPPP(4駒関係)手番なし。→　※2,※3
-// #define EVAL_KPPPT     // △  KPPP(4駒関係)手番あり。→　実装したけどいまひとつだったので差分計算実装せず。※2,※3
-// #define EVAL_PPET      // ×  技巧型 2駒+利き+手番(実装予定なし)
-// #define EVAL_KKPPT     // ○  KKPP型 4駒関係 手番あり。(55将棋、56将棋でも使えそう)※3
-// #define EVAL_KKPP_KKPT // ○  KKPP型 4駒関係 手番はKK,KKPTにのみあり。※3
-// #define EVAL_NABLA     // ○  ∇(ナブラ) 評価関数(現状、非公開)
-// #define EVAL_HELICES   // ？  螺旋評価関数
+// #define EVAL_NO_USE    // �I�@�]���֐��Ȃ��B��4
+// #define EVAL_MATERIAL  // ��  ��݂̂̕]���֐�
+// #define EVAL_PP        // �~  �c�c�J�i�^ 2��֌W(�J���\��Ȃ�)
+// #define EVAL_KPP       // �I  Bonanza�^ 3��֌W�A��ԂȂ�
+// #define EVAL_KPPT      // ��  Bonanza�^ 3��֌W�A��Ԃ�(Apery WCSC26����)
+// #define EVAL_KPP_KKPT  // ��  KK��Ԃ��� + KKP��Ԃ��� + KPP��ԂȂ�(Ponanza WCSC26�����H)
+// #define EVAL_KPP_KKPT_FV_VAR // �� KPP_KKPT�Ɠ���B��5
+// #define EVAL_KPP_PPT   // �~  PP��Ԃ��� + KKP��Ԃ��� + KPP��ԂȂ�(�����A�r���܂�)��1
+// #define EVAL_KPPP_KKPT // ��  KKP��Ԃ��� + KPP��ԂȂ� + KPPP(4��֌W)��ԂȂ��B���@��2,��3
+// #define EVAL_KPPPT     // ��  KPPP(4��֌W)��Ԃ���B���@�����������ǂ��܂ЂƂ������̂ō����v�Z���������B��2,��3
+// #define EVAL_PPET      // �~  �Z�I�^ 2��+����+���(�����\��Ȃ�)
+// #define EVAL_KKPPT     // ��  KKPP�^ 4��֌W ��Ԃ���B(55�����A56�����ł��g������)��3
+// #define EVAL_KKPP_KKPT // ��  KKPP�^ 4��֌W ��Ԃ�KK,KKPT�ɂ݂̂���B��3
+// #define EVAL_NABLA     // ��  ��(�i�u��) �]���֐�(����A����J)
+// #define EVAL_HELICES   // �H  �����]���֐�
 
-// ※1 : KPP_PPTは、差分計算が面倒で割に合わないことが判明したのでこれを使うぐらいならKPP_KKPTで十分だという結論。
-// ※2 : 実装したけどいまひとつだったので差分計算実装せず。そのため遅すぎて、実質使い物にならない。ソースコードの参考用。
-// ※3 : このシンボルの値として対象とする王の升の数を指定する。例えばEVAL_KPPPTを27とdefineすると玉が自陣(3*9升 = 27)に
-//       いるときのみがKPPPTの評価対象となる。(そこ以外に玉があるときは普通のKPPT)
-// ※4 : 以前、EVAL_NO_USEという評価関数なしのものが選択できるようになっていたが、
-//       需要がほとんどない上に、ソースコードがifdefの嵐になるので読みづらいのでバッサリ削除した。
-//		代わりにEVAL_MATERIALを使うと良い。追加コストはほぼ無視できる。
-// ※5 : 可変長EvalListを用いるリファレンス実装。KPP_KKPT型に比べてわずかに遅いが、拡張性が非常に高く、
-//      極めて美しい実装なので、今後、評価関数の拡張は、これをベースにやっていくことになると思う。
+// ��1 : KPP_PPT�́A�����v�Z���ʓ|�Ŋ��ɍ���Ȃ����Ƃ����������̂ł�����g�����炢�Ȃ�KPP_KKPT�ŏ\�����Ƃ������_�B
+// ��2 : �����������ǂ��܂ЂƂ������̂ō����v�Z���������B���̂��ߒx�����āA�����g�����ɂȂ�Ȃ��B�\�[�X�R�[�h�̎Q�l�p�B
+// ��3 : ���̃V���{���̒l�Ƃ��đΏۂƂ��鉤�̏��̐����w�肷��B�Ⴆ��EVAL_KPPPT��27��define����Ƌʂ����w(3*9�� = 27)��
+//       ����Ƃ��݂̂�KPPPT�̕]���ΏۂƂȂ�B(�����ȊO�ɋʂ�����Ƃ��͕��ʂ�KPPT)
+// ��4 : �ȑO�AEVAL_NO_USE�Ƃ����]���֐��Ȃ��̂��̂��I���ł���悤�ɂȂ��Ă������A
+//       ���v���قƂ�ǂȂ���ɁA�\�[�X�R�[�h��ifdef�̗��ɂȂ�̂œǂ݂Â炢�̂Ńo�b�T���폜�����B
+//		�����EVAL_MATERIAL���g���Ɨǂ��B�ǉ��R�X�g�͂قږ����ł���B
+// ��5 : �ϒ�EvalList��p���郊�t�@�����X�����BKPP_KKPT�^�ɔ�ׂĂ킸���ɒx�����A�g���������ɍ����A
+//      �ɂ߂Ĕ����������Ȃ̂ŁA����A�]���֐��̊g���́A������x�[�X�ɂ���Ă������ƂɂȂ�Ǝv���B
 
 
-// 評価関数を教師局面から学習させるときに使うときのモード
+// �]���֐������t�ǖʂ���w�K������Ƃ��Ɏg���Ƃ��̃��[�h
 // #define EVAL_LEARN
 
-// Eval::compute_eval()やLearner::add_grad()を呼び出す前にEvalListの組み換えを行なう機能を提供する。
-// 評価関数の実験に用いる。詳しくは、Eval::make_list_functionに書いてある説明などを読むこと。
+// Eval::compute_eval()��Learner::add_grad()���Ăяo���O��EvalList�̑g�݊������s�Ȃ��@�\��񋟂���B
+// �]���֐��̎����ɗp����B�ڂ����́AEval::make_list_function�ɏ����Ă�������Ȃǂ�ǂނ��ƁB
 // #define USE_EVAL_MAKE_LIST_FUNCTION
 
-// この機能は、やねうら王の評価関数の開発/実験用の機能で、いまのところ一般ユーザーには提供していない。
-// 評価関数番号を指定するとその評価関数を持ち、その評価関数ファイルの読み込み/書き出しに自動的に対応して、
-// かつ評価関数の旧形式からの変換が"test convert"コマンドで自動的に出来るようになるという、わりかし凄い機能
+// ���̋@�\�́A��˂��牤�̕]���֐��̊J��/�����p�̋@�\�ŁA���܂̂Ƃ����ʃ��[�U�[�ɂ͒񋟂��Ă��Ȃ��B
+// �]���֐��ԍ����w�肷��Ƃ��̕]���֐��������A���̕]���֐��t�@�C���̓ǂݍ���/�����o���Ɏ����I�ɑΉ����āA
+// ���]���֐��̋��`������̕ϊ���"test convert"�R�}���h�Ŏ����I�ɏo����悤�ɂȂ�Ƃ����A��肩�������@�\
 // #define EVAL_EXPERIMENTAL 0001
 
-// 長い利き(遠方駒の利き)のライブラリを用いるか。
-// 超高速1手詰め判定などではこのライブラリが必要。
-// do_move()のときに利きの差分更新を行なうので、do_move()は少し遅くなる。(その代わり、利きが使えるようになる)
+// ��������(������̗���)�̃��C�u������p���邩�B
+// ������1��l�ߔ���Ȃǂł͂��̃��C�u�������K�v�B
+// do_move()�̂Ƃ��ɗ����̍����X�V���s�Ȃ��̂ŁAdo_move()�͏����x���Ȃ�B(���̑���A�������g����悤�ɂȂ�)
 //#define LONG_EFFECT_LIBRARY
 
-// 1手詰め判定ルーチンを用いるか。
-// LONG_EFFECT_LIBRARYが有効なときは、利きを利用した高速な一手詰め。
-// LONG_EFFECT_LIBRARYが無効なときは、Bonanza6風の一手詰め。
+// 1��l�ߔ��胋�[�`����p���邩�B
+// LONG_EFFECT_LIBRARY���L���ȂƂ��́A�����𗘗p���������Ȉ��l�߁B
+// LONG_EFFECT_LIBRARY�������ȂƂ��́ABonanza6���̈��l�߁B
 //#define USE_MATE_1PLY
 
-// Position::see()を用いるか。これはSEE(Static Exchange Evaluation : 静的取り合い評価)の値を返す関数。
+// Position::see()��p���邩�B�����SEE(Static Exchange Evaluation : �ÓI��荇���]��)�̒l��Ԃ��֐��B
 // #define USE_SEE
 
-// PV(読み筋)を表示するときに置換表の指し手をかき集めてきて表示するか。
-// 自前でPVを管理してRootMoves::pvを更新するなら、この機能を使う必要はない。
-// これはPVの更新が不要なので実装が簡単だが、Ponderの指し手を返すためには
-// PVが常に正常に更新されていないといけないので最近はこの方法は好まれない。
-// ただしShogiGUIの解析モードでは思考エンジンが出力した最後の読み筋を記録するようなので、
-// 思考を途中で打ち切るときに、fail low/fail highが起きていると、中途半端なPVが出力され、それが棋譜に残る。
-// かと言って、そのときにPVの出力をしないと、最後に出力されたPVとbest moveとは異なる可能性があるので、
-// それはよろしくない。検討モード用の思考オプションを用意すべき。
+// PV(�ǂ݋�)��\������Ƃ��ɒu���\�̎w����������W�߂Ă��ĕ\�����邩�B
+// ���O��PV���Ǘ�����RootMoves::pv���X�V����Ȃ�A���̋@�\���g���K�v�͂Ȃ��B
+// �����PV�̍X�V���s�v�Ȃ̂Ŏ������ȒP�����APonder�̎w�����Ԃ����߂ɂ�
+// PV����ɐ���ɍX�V����Ă��Ȃ��Ƃ����Ȃ��̂ōŋ߂͂��̕��@�͍D�܂�Ȃ��B
+// ������ShogiGUI�̉�̓��[�h�ł͎v�l�G���W�����o�͂����Ō�̓ǂ݋؂��L�^����悤�Ȃ̂ŁA
+// �v�l��r���őł��؂�Ƃ��ɁAfail low/fail high���N���Ă���ƁA���r���[��PV���o�͂���A���ꂪ�����Ɏc��B
+// ���ƌ����āA���̂Ƃ���PV�̏o�͂����Ȃ��ƁA�Ō�ɏo�͂��ꂽPV��best move�Ƃ͈قȂ�\��������̂ŁA
+// ����͂�낵���Ȃ��B�������[�h�p�̎v�l�I�v�V������p�ӂ��ׂ��B
 // #define USE_TT_PV
 
-// 定跡を作るコマンド("makebook")を有効にする。
+// ��Ղ����R�}���h("makebook")��L���ɂ���B
 // #define ENABLE_MAKEBOOK_CMD
 
-// 入玉時の宣言勝ちを用いるか
+// ���ʎ��̐錾������p���邩
 // #define USE_ENTERING_KING_WIN
 
-// TimeMangementクラスに、今回の思考時間を計算する機能を追加するか。
+// TimeMangement�N���X�ɁA����̎v�l���Ԃ��v�Z����@�\��ǉ����邩�B
 // #define USE_TIME_MANAGEMENT
 
-// 置換表のなかでevalを持たない
+// �u���\�̂Ȃ���eval�������Ȃ�
 // #define NO_EVAL_IN_TT
 
-// ONE_PLY == 1にするためのモード。これを指定していなければONE_PLY == 2
+// ONE_PLY == 1�ɂ��邽�߂̃��[�h�B������w�肵�Ă��Ȃ����ONE_PLY == 2
 // #define ONE_PLY_EQ_1
 
-// オーダリングに使っているStatsの配列のなかで駒打ちのためのbitを持つ。
+// �I�[�_�����O�Ɏg���Ă���Stats�̔z��̂Ȃ��ŋ�ł��̂��߂�bit�����B
 // #define USE_DROPBIT_IN_STATS
 
-// 指し手生成のときに上位16bitにto(移動後の升)に来る駒を格納する。
+// �w���萶���̂Ƃ��ɏ��16bit��to(�ړ���̏�)�ɗ������i�[����B
 // #define KEEP_PIECE_IN_GENERATE_MOVES
 
-// 評価関数を計算したときに、それをHashTableに記憶しておく機能。KPPT評価関数においてのみサポート。
+// �]���֐����v�Z�����Ƃ��ɁA�����HashTable�ɋL�����Ă����@�\�BKPPT�]���֐��ɂ����Ă̂݃T�|�[�g�B
 // #define USE_EVAL_HASH
 
-// sfenを256bitにpackする機能、unpackする機能を有効にする。
-// これをdefineするとPosition::packe_sfen(),unpack_sfen()が使えるようになる。
+// sfen��256bit��pack����@�\�Aunpack����@�\��L���ɂ���B
+// �����define�����Position::packe_sfen(),unpack_sfen()���g����悤�ɂȂ�B
 // #define USE_SFEN_PACKER
 
-// 置換表のprobeに必ず失敗する設定
-// 自己生成棋譜からの学習でqsearch()のPVが欲しいときに
-// 置換表にhitして枝刈りされたときにPVが得られないの悔しいので
+// �u���\��probe�ɕK�����s����ݒ�
+// ���Ȑ�����������̊w�K��qsearch()��PV���~�����Ƃ���
+// �u���\��hit���Ď}���肳�ꂽ�Ƃ���PV�������Ȃ��̉������̂�
 // #define USE_FALSE_PROBE_IN_TT
 
-// 評価関数パラメーターを共有メモリを用いて他プロセスのものと共有する。
-// 少ないメモリのマシンで思考エンジンを何十個も立ち上げようとしたときにメモリ不足になるので
-// 評価関数をshared memoryを用いて他のプロセスと共有する機能。(対応しているのはいまのところKPPT評価関数のみ。かつWindows限定)
+// �]���֐��p�����[�^�[�����L��������p���đ��v���Z�X�̂��̂Ƌ��L����B
+// ���Ȃ��������̃}�V���Ŏv�l�G���W�������\�������グ�悤�Ƃ����Ƃ��Ƀ������s���ɂȂ�̂�
+// �]���֐���shared memory��p���đ��̃v���Z�X�Ƌ��L����@�\�B(�Ή����Ă���̂͂��܂̂Ƃ���KPPT�]���֐��̂݁B����Windows����)
 // #define USE_SHARED_MEMORY_IN_EVAL
 
-// USIプロトコルでgameoverコマンドが送られてきたときに gameover_handler()を呼び出す。
+// USI�v���g�R����gameover�R�}���h�������Ă����Ƃ��� gameover_handler()���Ăяo���B
 // #define USE_GAMEOVER_HANDLER
 
-// EVAL_HASHで使用するメモリとして大きなメモリを確保するか。
-// これをONすると数%高速化する代わりに、メモリ使用量が1GBほど増える。
+// EVAL_HASH�Ŏg�p���郁�����Ƃ��đ傫�ȃ��������m�ۂ��邩�B
+// �����ON����Ɛ�%�������������ɁA�������g�p�ʂ�1GB�قǑ�����B
 // #define USE_LARGE_EVAL_HASH
 
-// GlobalOptionという、EVAL_HASHを有効/無効を切り替えたり、置換表の有効/無効を切り替えたりする
-// オプションのための変数が使えるようになる。スピードが1%ぐらい遅くなるので大会用のビルドではオフを推奨。
+// GlobalOption�Ƃ����AEVAL_HASH��L��/������؂�ւ�����A�u���\�̗L��/������؂�ւ����肷��
+// �I�v�V�����̂��߂̕ϐ����g����悤�ɂȂ�B�X�s�[�h��1%���炢�x���Ȃ�̂ő��p�̃r���h�ł̓I�t�𐄏��B
 // #define USE_GLOBAL_OPTIONS
 
-// トーナメント(大会)用のビルド。最新CPU(いまはAVX2)用でEVAL_HASH大きめ。EVAL_LEARN、TEST_CMD使用不可。ASSERTなし。GlobalOptionsなし。
+// �g�[�i�����g(���)�p�̃r���h�B�ŐVCPU(���܂�AVX2)�p��EVAL_HASH�傫�߁BEVAL_LEARN�ATEST_CMD�g�p�s�BASSERT�Ȃ��BGlobalOptions�Ȃ��B
 // #define FOR_TOURNAMENT
 
-// 棋譜の変換などを行なうツールセット。CSA,KIF,KIF2(KI2)形式などの入出力を担う。
-// これをdefineすると、extra/kif_converter/ フォルダにある棋譜や指し手表現の変換を行なう関数群が使用できるようになる。
+// �����̕ϊ��Ȃǂ��s�Ȃ��c�[���Z�b�g�BCSA,KIF,KIF2(KI2)�`���Ȃǂ̓��o�͂�S���B
+// �����define����ƁAextra/kif_converter/ �t�H���_�ɂ��������w����\���̕ϊ����s�Ȃ��֐��Q���g�p�ł���悤�ɂȂ�B
 // #define USE_KIF_CONVERT_TOOLS
+
+// 128GB�����̒u���\���g�������Ƃ��p�B
+// ���̃V���{�����`�����Options["Hash"]�Ƃ���131072(=128*1024[MB]�B���Ȃ킿128GB)�����̒u���\��������悤�ɂȂ�B
+// Stockfish�̃R�~���j�e�B�ł͂܂��c�_���Ȃ̂Ńf�t�H���g�ŃI�t�ɂ��Ă����B
+// cf. 128 GB TT size limitation : https://github.com/official-stockfish/Stockfish/issues/1349
+// #define USE_HUGE_HASH
 
 // --------------------
 // release configurations
 // --------------------
 
-// --- 通常の思考エンジンとして実行ファイルを公開するとき用の設定集
+// --- �ʏ�̎v�l�G���W���Ƃ��Ď��s�t�@�C�������J����Ƃ��p�̐ݒ�W
 
-// やねうら王2018 with お多福ラボ
+// ��˂��牤2018 with ���������{
 #if defined(YANEURAOU_2018_OTAFUKU_ENGINE)
-#define ENGINE_NAME "YaneuraOu 2018 Otafuku"
+#define ENGINE_NAME "YaneuraOu 2018 Otafuku (dolphin)"
 #define EVAL_KPPT
 //#define EVAL_KPP_KKPT
 
@@ -237,31 +241,31 @@
 #define KEEP_PIECE_IN_GENERATE_MOVES
 #define ONE_PLY_EQ_1
 
-// デバッグ絡み
+// �f�o�b�O����
 //#define ASSERT_LV 3
 //#define USE_DEBUG_ASSERT
 
 #define ENABLE_TEST_CMD
-// 学習絡みのオプション
+// �w�K���݂̃I�v�V����
 #define USE_SFEN_PACKER
-// 学習機能を有効にするオプション。
+// �w�K�@�\��L���ɂ���I�v�V�����B
 #define EVAL_LEARN
 
-// 定跡生成絡み
+// ��Ր�������
 #define ENABLE_MAKEBOOK_CMD
-// 評価関数を共用して複数プロセス立ち上げたときのメモリを節約。(いまのところWindows限定)
+// �]���֐������p���ĕ����v���Z�X�����グ���Ƃ��̃�������ߖ�B(���܂̂Ƃ���Windows����)
 #define USE_SHARED_MEMORY_IN_EVAL
-// パラメーターの自動調整絡み
+// �p�����[�^�[�̎�����������
 #define USE_GAMEOVER_HANDLER
 //#define LONG_EFFECT_LIBRARY
 
-// GlobalOptionsは有効にしておく。
+// GlobalOptions�͗L���ɂ��Ă����B
 #define USE_GLOBAL_OPTIONS
 #endif
 
 
 
-// 極やねうら王2018(非公開)
+// �ɂ�˂��牤2018(����J)
 #if defined(YANEURAOU_2018_GOKU_ENGINE)
 #define ENGINE_NAME "YaneuraOu 2018 GOKU"
 
@@ -289,10 +293,10 @@
 
 //#define EVAL_MATERIAL
 
-// 実験中の評価関数
-// 評価関数の番号を選択できる。0001～9999から選ぶ。
-// 番号として、0000は、if EVAL_EXPERIMENTAL == 0000と判定しようとしたときに、C++の言語仕様として
-// シンボルが定義されていないときこの条件式が真だと判定されてしまうので使えない。
+// �������̕]���֐�
+// �]���֐��̔ԍ���I���ł���B0001�`9999����I�ԁB
+// �ԍ��Ƃ��āA0000�́Aif EVAL_EXPERIMENTAL == 0000�Ɣ��肵�悤�Ƃ����Ƃ��ɁAC++�̌���d�l�Ƃ���
+// �V���{������`����Ă��Ȃ��Ƃ����̏��������^���Ɣ��肳��Ă��܂��̂Ŏg���Ȃ��B
 //#define EVAL_EXPERIMENTAL 0005
 
 #define USE_EVAL_HASH
@@ -303,41 +307,79 @@
 #define KEEP_PIECE_IN_GENERATE_MOVES
 #define ONE_PLY_EQ_1
 
-// デバッグ絡み
+// �f�o�b�O����
 //#define ASSERT_LV 3
 //#define USE_DEBUG_ASSERT
 
 #define ENABLE_TEST_CMD
-// 学習絡みのオプション
+// �w�K���݂̃I�v�V����
 #define USE_SFEN_PACKER
-// 学習機能を有効にするオプション。
+// �w�K�@�\��L���ɂ���I�v�V�����B
 #define EVAL_LEARN
-// 開発中の教師局面の生成コマンド
+// �J�����̋��t�ǖʂ̐����R�}���h
 #define USE_GENSFEN2018
 
-// 定跡生成絡み
+// ��Ր�������
 #define ENABLE_MAKEBOOK_CMD
-// 評価関数を共用して複数プロセス立ち上げたときのメモリを節約。(いまのところWindows限定)
+// �]���֐������p���ĕ����v���Z�X�����グ���Ƃ��̃�������ߖ�B(���܂̂Ƃ���Windows����)
 #define USE_SHARED_MEMORY_IN_EVAL
-// パラメーターの自動調整絡み
+// �p�����[�^�[�̎�����������
 #define USE_GAMEOVER_HANDLER
 //#define LONG_EFFECT_LIBRARY
 
-// GlobalOptionsは有効にしておく。
+// GlobalOptions�͗L���ɂ��Ă����B
 #define USE_GLOBAL_OPTIONS
+#endif
+
+
+#if defined(YANEURAOU_2018_TNK_ENGINE)
+#define ENGINE_NAME "FF2"
+#define EVAL_NNUE
+
+#define USE_EVAL_HASH
+#define USE_SEE
+#define USE_MATE_1PLY
+#define USE_ENTERING_KING_WIN
+#define USE_TIME_MANAGEMENT
+#define KEEP_PIECE_IN_GENERATE_MOVES
+#define ONE_PLY_EQ_1
+
+// �f�o�b�O����
+//#define ASSERT_LV 3
+//#define USE_DEBUG_ASSERT
+
+#define ENABLE_TEST_CMD
+// �w�K���݂̃I�v�V����
+#define USE_SFEN_PACKER
+// �w�K�@�\��L���ɂ���I�v�V�����B
+#define EVAL_LEARN
+
+// ��Ր�������
+#define ENABLE_MAKEBOOK_CMD
+// �]���֐������p���ĕ����v���Z�X�����グ���Ƃ��̃�������ߖ�B(���܂̂Ƃ���Windows����)
+//#define USE_SHARED_MEMORY_IN_EVAL
+// �p�����[�^�[�̎�����������
+#define USE_GAMEOVER_HANDLER
+//#define LONG_EFFECT_LIBRARY
+
+// GlobalOptions�͗L���ɂ��Ă����B
+#define USE_GLOBAL_OPTIONS
+
+// �T������YANEURAOU_2018_OTAFUKU_ENGINE���g���B
+#define YANEURAOU_2018_OTAFUKU_ENGINE
 #endif
 
 
 #ifdef LOCAL_GAME_SERVER
 #define ENGINE_NAME "YaneuraOu Local Game Server"
 #define EVAL_MATERIAL
-#define ASSERT_LV 3 // ローカルゲームサーバー、host側の速度はそれほど要求されないのでASSERT_LVを3にしておく。
+#define ASSERT_LV 3 // ���[�J���Q�[���T�[�o�[�Ahost���̑��x�͂���قǗv������Ȃ��̂�ASSERT_LV��3�ɂ��Ă����B
 #define KEEP_LAST_MOVE
 #define USE_ENTERING_KING_WIN
 #endif
 
 
-// --- 協力詰めエンジンとして実行ファイルを公開するとき用の設定集
+// --- ���͋l�߃G���W���Ƃ��Ď��s�t�@�C�������J����Ƃ��p�̐ݒ�W
 
 #ifdef HELP_MATE_ENGINE
 #define ENGINE_NAME "YaneuraOu help mate solver"
@@ -349,7 +391,7 @@
 #define EVAL_MATERIAL
 #endif
 
-// --- 詰将棋エンジンとして実行ファイルを公開するとき用の設定集
+// --- �l�����G���W���Ƃ��Ď��s�t�@�C�������J����Ƃ��p�̐ݒ�W
 
 #ifdef MATE_ENGINE
 #define ENGINE_NAME "YaneuraOu mate solver"
@@ -364,7 +406,7 @@
 #define ENABLE_TEST_CMD
 #endif
 
-// --- ユーザーの自作エンジンとして実行ファイルを公開するとき用の設定集
+// --- ���[�U�[�̎���G���W���Ƃ��Ď��s�t�@�C�������J����Ƃ��p�̐ݒ�W
 
 #ifdef USER_ENGINE
 #define ENGINE_NAME "YaneuraOu user engine"
@@ -375,7 +417,7 @@
 //   for tournament
 // --------------------
 
-// トーナメント(大会)用に、対局に不要なものをすべて削ぎ落とす。
+// �g�[�i�����g(���)�p�ɁA�΋ǂɕs�v�Ȃ��̂����ׂč킬���Ƃ��B
 #if defined(FOR_TOURNAMENT)
 #undef ASSERT_LV
 #undef EVAL_LEARN
@@ -388,13 +430,13 @@
 //   for learner
 // --------------------
 
-// 学習時にはEVAL_HASHを無効化しておかないと、rmseの計算のときなどにeval hashにhitしてしまい、
-// 正しく計算できない。そのため、EVAL_HASHを動的に無効化するためのオプションを用意する。
+// �w�K���ɂ�EVAL_HASH�𖳌������Ă����Ȃ��ƁArmse�̌v�Z�̂Ƃ��Ȃǂ�eval hash��hit���Ă��܂��A
+// �������v�Z�ł��Ȃ��B���̂��߁AEVAL_HASH�𓮓I�ɖ��������邽�߂̃I�v�V������p�ӂ���B
 #if defined(EVAL_LEARN)
 #define USE_GLOBAL_OPTIONS
 #endif
 
-// 評価関数の実験用のときは、EvalListの組み換えが必要になる。
+// �]���֐��̎����p�̂Ƃ��́AEvalList�̑g�݊������K�v�ɂȂ�B
 #if EVAL_EXPERIMENTAL >= 0001
 #define USE_EVAL_MAKE_LIST_FUNCTION
 #endif
@@ -407,25 +449,25 @@
 
 struct GlobalOptions_
 {
-	// eval hashを有効/無効化する。
-	// (USE_EVAL_HASHがdefineされていないと有効にはならない。)
+	// eval hash��L��/����������B
+	// (USE_EVAL_HASH��define����Ă��Ȃ��ƗL���ɂ͂Ȃ�Ȃ��B)
 	bool use_eval_hash;
 
-	// 置換表のprobe()を有効化/無効化する。
-	// (無効化するとTT.probe()が必ずmiss hitするようになる)
+	// �u���\��probe()��L����/����������B
+	// (�����������TT.probe()���K��miss hit����悤�ɂȂ�)
 	bool use_hash_probe;
 
-	// スレッドごとに置換表を用意する設定
-	// Learner::search(),Leaner::qsearch()を呼ぶときにスレッドごとに置換表が用意されていないと嫌ならこれを呼び出す。
-	// この機能を有効にした場合、TT.new_search()を呼び出したときのOptions["Threads"]の値に従って、
-	// 置換表を分割するのでLearner::search()を呼ぶまでに事前にTT.new_search()を呼び出すこと。
+	// �X���b�h���Ƃɒu���\��p�ӂ���ݒ�
+	// Learner::search(),Leaner::qsearch()���ĂԂƂ��ɃX���b�h���Ƃɒu���\���p�ӂ���Ă��Ȃ��ƌ��Ȃ炱����Ăяo���B
+	// ���̋@�\��L���ɂ����ꍇ�ATT.new_search()���Ăяo�����Ƃ���Options["Threads"]�̒l�ɏ]���āA
+	// �u���\�𕪊�����̂�Learner::search()���ĂԂ܂łɎ��O��TT.new_search()���Ăяo�����ƁB
 	bool use_per_thread_tt;
 
-	// 置換表とTTEntryの世代が異なるなら、値(TTEntry.value)は信用できないと仮定するフラグ。
-	// TT.probe()のときに、TTEntryとTT.generationとが厳密に一致しない場合は、
-	// 置換表にhitしても、そのTTEntryはVALUE_NONEを返す。
-	// こうすることで、hash衝突しておかしな値が書き込まれていてもそれを回避できる。
-	// gensfenコマンドでこの機能が必要だった。
+	// �u���\��TTEntry�̐��オ�قȂ�Ȃ�A�l(TTEntry.value)�͐M�p�ł��Ȃ��Ɖ��肷��t���O�B
+	// TT.probe()�̂Ƃ��ɁATTEntry��TT.generation�Ƃ������Ɉ�v���Ȃ��ꍇ�́A
+	// �u���\��hit���Ă��A����TTEntry��VALUE_NONE��Ԃ��B
+	// �������邱�ƂŁAhash�Փ˂��Ă������Ȓl���������܂�Ă��Ă����������ł���B
+	// gensfen�R�}���h�ł��̋@�\���K�v�������B
 	// cf. http://yaneuraou.yaneu.com/2017/06/30/%E3%80%90%E8%A7%A3%E6%B1%BA%E3%80%91gensfen%E3%81%A7%E6%95%99%E5%B8%AB%E5%B1%80%E9%9D%A2%E7%94%9F%E6%88%90%E6%99%82%E3%81%AB%E9%81%85%E3%81%8F%E3%81%AA%E3%82%8B%E5%95%8F%E9%A1%8C/
 	bool use_strict_generational_tt;
 
@@ -454,7 +496,7 @@ extern GlobalOptions_ GlobalOptions;
 #include <iostream>
 #include <fstream>
 #include <mutex>
-#include <thread>		// このあとMutexをtypedefするので
+#include <thread>		// ���̂���Mutex��typedef����̂�
 #include <condition_variable>
 #include <cstring>		// std::memcpy()
 #include <cmath>		// log(),std::round()
@@ -470,18 +512,18 @@ extern GlobalOptions_ GlobalOptions;
 
 // --- assertion tools
 
-// DEBUGビルドでないとassertが無効化されてしまうので無効化されないASSERT
-// 故意にメモリアクセス違反を起こすコード。
-// USE_DEBUG_ASSERTが有効なときには、ASSERTの内容を出力したあと、3秒待ってから
-// アクセス違反になるようなコードを実行する。
+// DEBUG�r���h�łȂ���assert������������Ă��܂��̂Ŗ���������Ȃ�ASSERT
+// �̈ӂɃ������A�N�Z�X�ᔽ���N�����R�[�h�B
+// USE_DEBUG_ASSERT���L���ȂƂ��ɂ́AASSERT�̓��e���o�͂������ƁA3�b�҂��Ă���
+// �A�N�Z�X�ᔽ�ɂȂ�悤�ȃR�[�h�����s����B
 #if !defined (USE_DEBUG_ASSERT)
 #define ASSERT(X) { if (!(X)) *(int*)1 = 0; }
 #else
-#define ASSERT(X) { if (!(X)) { std::cout << "\nError : ASSERT(" << #X << ")" << std::endl; \
+#define ASSERT(X) { if (!(X)) { std::cout << "\nError : ASSERT(" << #X << "), " << __FILE__ << "(" << __LINE__ << "): " << __func__ << std::endl; \
  std::this_thread::sleep_for(std::chrono::microseconds(3000)); *(int*)1 =0;} }
 #endif
 
-// ASSERT LVに応じたassert
+// ASSERT LV�ɉ�����assert
 #ifndef ASSERT_LV
 #define ASSERT_LV 0
 #endif
@@ -495,9 +537,9 @@ extern GlobalOptions_ GlobalOptions;
 
 // --- declaration of unreachablity
 
-// switchにおいてdefaultに到達しないことを明示して高速化させる
+// switch�ɂ�����default�ɓ��B���Ȃ����Ƃ𖾎����č�����������
 
-// デバッグ時は普通にしとかないと変なアドレスにジャンプして原因究明に時間がかかる。
+// �f�o�b�O���͕��ʂɂ��Ƃ��Ȃ��ƕςȃA�h���X�ɃW�����v���Č��������Ɏ��Ԃ�������B
 #if defined(_MSC_VER)
 #define UNREACHABLE ASSERT_LV3(false); __assume(0);
 #elif defined(__GNUC__)
@@ -508,7 +550,7 @@ extern GlobalOptions_ GlobalOptions;
 
 // --- alignment tools
 
-// 構造体などのアライメントを揃えるための宣言子
+// �\���̂Ȃǂ̃A���C�����g�𑵂��邽�߂̐錾�q
 
 #if defined(_MSC_VER)
 #define ALIGNED(X) __declspec(align(X))
@@ -521,13 +563,13 @@ extern GlobalOptions_ GlobalOptions;
 // --- for linux
 
 #if !defined(_MSC_VER)
-// stricmpはlinux系では存在しないらしく、置き換える。
+// stricmp��linux�n�ł͑��݂��Ȃ��炵���A�u��������B
 #define _stricmp strcasecmp
 
-// あと、getline()したときにテキストファイルが'\r\n'だと
-// '\r'が末尾に残るのでこの'\r'を除去するためにwrapperを書く。
-// そのため、fstreamに対してgetline()を呼び出すときは、
-// std::getline()ではなく単にgetline()と書いて、この関数を使うべき。
+// ���ƁAgetline()�����Ƃ��Ƀe�L�X�g�t�@�C����'\r\n'����
+// '\r'�������Ɏc��̂ł���'\r'���������邽�߂�wrapper�������B
+// ���̂��߁Afstream�ɑ΂���getline()���Ăяo���Ƃ��́A
+// std::getline()�ł͂Ȃ��P��getline()�Ə����āA���̊֐����g���ׂ��B
 inline bool getline(std::fstream& fs, std::string& s)
 {
 	bool b = (bool)std::getline(fs, s);
@@ -540,7 +582,7 @@ inline bool getline(std::fstream& fs, std::string& s)
 
 // --- output for Japanese notation
 
-// PRETTY_JPが定義されているかどうかによって三項演算子などを使いたいので。
+// PRETTY_JP����`����Ă��邩�ǂ����ɂ���ĎO�����Z�q�Ȃǂ��g�������̂ŁB
 #if defined (PRETTY_JP)
 constexpr bool pretty_jp = true;
 #else
@@ -560,7 +602,7 @@ constexpr bool pretty_jp = false;
 
 // --- Dropbit
 
-// USE_DROPBIT_IN_STATSがdefineされているときは、Moveの上位16bitに格納するPieceとして駒打ちは +32(PIECE_DROP)　にする。
+// USE_DROPBIT_IN_STATS��define����Ă���Ƃ��́AMove�̏��16bit�Ɋi�[����Piece�Ƃ��ċ�ł��� +32(PIECE_DROP)�@�ɂ���B
 #ifdef USE_DROPBIT_IN_STATS
 #define PIECE_DROP 32
 #else
@@ -569,8 +611,8 @@ constexpr bool pretty_jp = false;
 
 // --- lastMove
 
-// KIF形式に変換するときにPositionクラスにその局面へ至る直前の指し手が保存されていないと
-// "同"金のように出力できなくて困る。
+// KIF�`���ɕϊ�����Ƃ���Position�N���X�ɂ��̋ǖʂ֎��钼�O�̎w���肪�ۑ�����Ă��Ȃ���
+// "��"���̂悤�ɏo�͂ł��Ȃ��č���B
 #ifdef USE_KIF_CONVERT_TOOLS
 #define KEEP_LAST_MOVE
 #endif
@@ -579,7 +621,7 @@ constexpr bool pretty_jp = false;
 //      CPU environment
 // ----------------------------
 
-// ターゲットが64bitOSかどうか
+// �^�[�Q�b�g��64bitOS���ǂ���
 #if (defined(_WIN64) && defined(_MSC_VER)) || (defined(__GNUC__) && defined(__x86_64__))
 constexpr bool Is64Bit = true;
 #define IS_64BIT
@@ -601,7 +643,7 @@ constexpr bool Is64Bit = false;
 #define TARGET_CPU "noSSE"
 #endif
 
-// 上位のCPUをターゲットとするなら、その下位CPUの命令はすべて使えるはずなので…。
+// ��ʂ�CPU���^�[�Q�b�g�Ƃ���Ȃ�A���̉���CPU�̖��߂͂��ׂĎg����͂��Ȃ̂Łc�B
 
 #ifdef USE_AVX512
 #define USE_AVX2
@@ -625,13 +667,13 @@ constexpr bool Is64Bit = false;
 
 #if !defined(IS_64BIT)
 
-// 32bit環境ではメモリが足りなくなるので以下の2つは強制的にオフにしておく。
+// 32bit���ł̓�����������Ȃ��Ȃ�̂ňȉ���2�͋����I�ɃI�t�ɂ��Ă����B
 
 #undef USE_EVAL_HASH
 #undef USE_SHARED_MEMORY_IN_EVAL
 
-// 機械学習用の配列もメモリ空間に収まりきらないのでコンパイルエラーとなるから
-// これもオフにしておく。
+// �@�B�w�K�p�̔z�����������ԂɎ��܂肫��Ȃ��̂ŃR���p�C���G���[�ƂȂ邩��
+// ������I�t�ɂ��Ă����B
 #undef EVAL_LEARN
 
 #endif
@@ -640,8 +682,8 @@ constexpr bool Is64Bit = false;
 //     mutex wrapper
 // ----------------------------
 
-// Windows用のmingw、gcc環境下でstd::mutexをもっと速い実装に差し替えたい時のためにwrapしてある。
-// そのためstd::mutex、std::condition_variableを直接用いるのではなく、Mutex、ConditionVariableを用いる。
+// Windows�p��mingw�Agcc������std::mutex�������Ƒ��������ɍ����ւ��������̂��߂�wrap���Ă���B
+// ���̂���std::mutex�Astd::condition_variable�𒼐ڗp����̂ł͂Ȃ��AMutex�AConditionVariable��p����B
 
 #include "thread_win32.h"
 
@@ -649,17 +691,17 @@ constexpr bool Is64Bit = false;
 //     mkdir wrapper
 // ----------------------------
 
-// カレントフォルダ相対で指定する。成功すれば0、失敗すれば非0が返る。
-// フォルダを作成する。日本語は使っていないものとする。
-// どうもmsys2環境下のgccだと_wmkdir()だとフォルダの作成に失敗する。原因不明。
-// 仕方ないので_mkdir()を用いる。
+// �J�����g�t�H���_���΂Ŏw�肷��B���������0�A���s����Δ�0���Ԃ�B
+// �t�H���_���쐬����B���{��͎g���Ă��Ȃ����̂Ƃ���B
+// �ǂ���msys2������gcc����_wmkdir()���ƃt�H���_�̍쐬�Ɏ��s����B�����s���B
+// �d���Ȃ��̂�_mkdir()��p����B
 
 #if defined(_WIN32)
-// Windows用
+// Windows�p
 
 #if defined(_MSC_VER)
-#include <codecvt>	// mkdirするのにwstringが欲しいのでこれが必要
-#include <locale>   // wstring_convertにこれが必要。
+#include <codecvt>	// mkdir����̂�wstring���~�����̂ł��ꂪ�K�v
+#include <locale>   // wstring_convert�ɂ��ꂪ�K�v�B
 inline int MKDIR(std::string dir_name)
 {
 	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cv;
@@ -674,9 +716,9 @@ inline int MKDIR(std::string dir_name)
 }
 #endif
 #elif defined(_LINUX)
-// linux環境において、この_LINUXというシンボルはmakefileにて定義されるものとする。
+// linux���ɂ����āA����_LINUX�Ƃ����V���{����makefile�ɂĒ�`�������̂Ƃ���B
 
-// Linux用のmkdir実装。
+// Linux�p��mkdir�����B
 #include "sys/stat.h"
 
 inline int MKDIR(std::string dir_name)
@@ -686,8 +728,8 @@ inline int MKDIR(std::string dir_name)
 
 #else
 
-// Linux環境かどうかを判定するためにはmakefileを分けないといけなくなってくるな..
-// linuxでフォルダ掘る機能は、とりあえずナシでいいや..。評価関数ファイルの保存にしか使ってないし…。
+// Linux�����ǂ����𔻒肷�邽�߂ɂ�makefile�𕪂��Ȃ��Ƃ����Ȃ��Ȃ��Ă����..
+// linux�Ńt�H���_�@��@�\�́A�Ƃ肠�����i�V�ł�����..�B�]���֐��t�@�C���̕ۑ��ɂ����g���ĂȂ����c�B
 inline int MKDIR(std::string dir_name)
 {
 	return 0;
@@ -700,7 +742,7 @@ inline int MKDIR(std::string dir_name)
 //     evaluate function
 // ----------------------------
 
-// -- 評価関数の種類によりエンジン名に使用する文字列を変更する。
+// -- �]���֐��̎�ނɂ��G���W�����Ɏg�p���镶�����ύX����B
 #if defined(EVAL_MATERIAL)
 #define EVAL_TYPE_NAME "Material"
 #elif defined(EVAL_KPPT)
@@ -719,58 +761,55 @@ inline int MKDIR(std::string dir_name)
 #define EVAL_TYPE_NAME "KPP_KKPT_FV_VAR"
 #elif defined(EVAL_NABLA)
 #define EVAL_TYPE_NAME "NABLA V2"
+#elif defined(EVAL_NNUE)
+#define EVAL_TYPE_NAME "NNUE"
 #else
 #define EVAL_TYPE_NAME ""
 #endif
 
-// -- do_move()のときに移動した駒の管理をして差分計算
+// -- do_move()�̂Ƃ��Ɉړ�������̊Ǘ������č����v�Z
 
-// 1. 駒番号を管理しているpiece_listについて
-//   これはPosition::eval_list()で取得可能。
-// 2. 移動した駒の管理について
-//   これは、Position::state()->dirtyPiece。
-//   FV38だと最大で2個。
-//   FV_VARだとn個(可変)。
-// 3. FV38だとある駒番号が何の駒であるかが決まっている。(PieceNumber型)
-// 4. FV_VARだとある駒番号が何の駒であるかは定まっていない。必要な駒だけがeval_list()に格納されている。
-//    駒落ちの場合、BonaPieceZeroは使われない。(必要ない駒はeval_list()に格納されていないため。)
-//    また、銀10枚のように特定の駒種の駒を増やすことにも対応できる。(EvalList::MAX_LENGTHを変更する必要はあるが。)
-// 5. FV38かFV_VARかどちらかを選択しなければならない。
-//    本来なら、そのどちらも用いないようにも出来ると良いのだが、ソースコードがぐちゃぐちゃになるのでそれはやらないことにした。
-// 6. FV_VAR方式は、Position::do_move()ではpiece_listは更新されず、dirtyPieceの情報のみが更新される。
-//    ゆえに、evaluate()ではdirtyPieceの情報に基づき、piece_listの更新もしなければならない。
-//    →　DirtyPiece::do_update()などを見ること。
-//    また、inv_piece()を用いるので、評価関数の初期化タイミングでEvalLearningTools::init_mir_inv_tables()を呼び出して
-//    inv_piece()が使える状態にしておかなければならない。
-// 7. FV_VAR方式のリファレンス実装として、EVAL_KPP_KKPT_FV_VARがあるので、そのソースコードを見ること。
+// 1. ��ԍ����Ǘ����Ă���piece_list�ɂ���
+//   �����Position::eval_list()�Ŏ擾�\�B
+// 2. �ړ�������̊Ǘ��ɂ���
+//   ����́APosition::state()->dirtyPiece�B
+//   FV38���ƍő��2�B
+//   FV_VAR����n��(��)�B
+// 3. FV38���Ƃ����ԍ������̋�ł��邩�����܂��Ă���B(PieceNumber�^)
+// 4. FV_VAR���Ƃ����ԍ������̋�ł��邩�͒�܂��Ă��Ȃ��B�K�v�ȋ����eval_list()�Ɋi�[����Ă���B
+//    ����̏ꍇ�ABonaPieceZero�͎g���Ȃ��B(�K�v�Ȃ����eval_list()�Ɋi�[����Ă��Ȃ����߁B)
+//    �܂��A��10���̂悤�ɓ���̋��̋�𑝂₷���Ƃɂ��Ή��ł���B(EvalList::MAX_LENGTH��ύX����K�v�͂��邪�B)
+// 5. FV38��FV_VAR���ǂ��炩��I�����Ȃ���΂Ȃ�Ȃ��B
+//    �{���Ȃ�A���̂ǂ�����p���Ȃ��悤�ɂ��o����Ɨǂ��̂����A�\�[�X�R�[�h�������Ⴎ����ɂȂ�̂ł���͂��Ȃ����Ƃɂ����B
+// 6. FV_VAR�����́APosition::do_move()�ł�piece_list�͍X�V���ꂸ�AdirtyPiece�̏��݂̂��X�V�����B
+//    �䂦�ɁAevaluate()�ł�dirtyPiece�̏��Ɋ�Â��Apiece_list�̍X�V�����Ȃ���΂Ȃ�Ȃ��B
+//    ���@DirtyPiece::do_update()�Ȃǂ����邱�ƁB
+//    �܂��Ainv_piece()��p����̂ŁA�]���֐��̏������^�C�~���O��EvalLearningTools::init_mir_inv_tables()���Ăяo����
+//    inv_piece()���g�����Ԃɂ��Ă����Ȃ���΂Ȃ�Ȃ��B
+// 7. FV_VAR�����̃��t�@�����X�����Ƃ��āAEVAL_KPP_KKPT_FV_VAR������̂ŁA���̃\�[�X�R�[�h�����邱�ƁB
 
-// あらゆる局面でP(駒)の数が増えないFV38と呼ばれる形式の差分計算用。
-#if defined(EVAL_KPPT) || defined(EVAL_KPP_KKPT) || defined(EVAL_KPPPT) || defined(EVAL_KPPP_KKPT) || defined(EVAL_KKPP_KKPT) || defined(EVAL_KKPPT) || defined(EVAL_HELICES)
+// ������ǖʂ�P(��)�̐��������Ȃ�FV38�ƌĂ΂��`���̍����v�Z�p�B
+#if defined(EVAL_KPPT) || defined(EVAL_KPP_KKPT) || defined(EVAL_KPPPT) || defined(EVAL_KPPP_KKPT) || defined(EVAL_KKPP_KKPT) || defined(EVAL_KKPPT) || defined(EVAL_HELICES) || defined(EVAL_NNUE)
 #define USE_FV38
 #endif
 
-// P(駒)の数が増えたり減ったりするタイプの差分計算用
-// FV38とは異なり、可変長piece_list。
+// P(��)�̐����������茸�����肷��^�C�v�̍����v�Z�p
+// FV38�Ƃ͈قȂ�A�ϒ�piece_list�B
 #if defined(EVAL_MATERIAL) || defined(EVAL_KPP_KKPT_FV_VAR) || defined(EVAL_NABLA)
 #define USE_FV_VAR
 #endif
 
-// -- 評価関数の種類により、盤面の利きの更新ときの処理が異なる。(このタイミングで評価関数の差分計算をしたいので)
+// -- �]���֐��̎�ނɂ��A�Ֆʂ̗����̍X�V�Ƃ��̏������قȂ�B(���̃^�C�~���O�ŕ]���֐��̍����v�Z���������̂�)
 
-// 盤面上の利きを更新するときに呼び出したい関数。(評価関数の差分更新などのために差し替え可能にしておく。)
+// �Ֆʏ�̗������X�V����Ƃ��ɌĂяo�������֐��B(�]���֐��̍����X�V�Ȃǂ̂��߂ɍ����ւ��\�ɂ��Ă����B)
 
-// color = 手番 , sq = 升 , e = 利きの加算量
+// color = ��� , sq = �� , e = �����̉��Z��
 #define ADD_BOARD_EFFECT(color_,sq_,e1_) { board_effect[color_].e[sq_] += (uint8_t)e1_; }
-// e1 = color側の利きの加算量 , e2 = ~color側の利きの加算量
+// e1 = color���̗����̉��Z�� , e2 = ~color���̗����̉��Z��
 #define ADD_BOARD_EFFECT_BOTH(color_,sq_,e1_,e2_) { board_effect[color_].e[sq_] += (uint8_t)e1_; board_effect[~color_].e[sq_] += (uint8_t)e2_; }
 
-// ↑の関数のundo_move()時用。こちらは、評価関数の差分更新を行わない。(評価関数の値を巻き戻すのは簡単であるため)
+// ���̊֐���undo_move()���p�B������́A�]���֐��̍����X�V���s��Ȃ��B(�]���֐��̒l�������߂��̂͊ȒP�ł��邽��)
 #define ADD_BOARD_EFFECT_REWIND(color_,sq_,e1_) { board_effect[color_].e[sq_] += (uint8_t)e1_; }
 #define ADD_BOARD_EFFECT_BOTH_REWIND(color_,sq_,e1_,e2_) { board_effect[color_].e[sq_] += (uint8_t)e1_; board_effect[~color_].e[sq_] += (uint8_t)e2_; }
-
-#ifdef USE_MSYS2
-//#undef USE_EVAL_HASH
-#undef USE_SHARED_MEMORY_IN_EVAL
-#endif
 
 #endif // _CONFIG_H_

@@ -1,6 +1,6 @@
 ﻿
 // Windows環境下でのプロセッサグループの割当関係
-#if defined(WIN32) || defined(_WIN32)
+#ifdef _WIN32
 #if _WIN32_WINNT < 0x0601
 #undef  _WIN32_WINNT
 #define _WIN32_WINNT 0x0601 // Force to include needed API prototypes
@@ -348,9 +348,7 @@ void prefetch2(void* addr)
 // --------------------
 //  全プロセッサを使う
 // --------------------
-#ifdef USE_MSYS2
-#undef _WIN32
-#endif
+
 namespace WinProcGroup {
 
 #if !defined ( _WIN32 )
@@ -466,14 +464,6 @@ namespace WinProcGroup {
 
 	void bindThisThread(size_t idx) {
 
-		// If OS already scheduled us on a different group than 0 then don't overwrite
-		// the choice, eventually we are one of many one-threaded processes running on
-		// some Windows NUMA hardware, for instance in fishtest. To make it simple,
-		// just check if running threads are below a threshold, in this case all this
-		// NUMA machinery is not needed.
-		if (Threads.size() < 8)
-			return;
-
 		// Use only local variables to be thread-safe
 		int group = get_group(idx);
 
@@ -496,6 +486,3 @@ namespace WinProcGroup {
 #endif
 
 } // namespace WinProcGroup
-#ifdef USE_MSYS2
-#define _WIN32
-#endif

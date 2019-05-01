@@ -39,8 +39,8 @@ namespace Book
 	// USI拡張コマンド "makebook"(定跡作成)
 	// ----------------------------------
 
-	// 局面を与えて、その局面で思考させるために、やねうら王2017Earlyが必要。
-#if defined(EVAL_LEARN) && (defined(YANEURAOU_2017_EARLY_ENGINE) || defined(YANEURAOU_2017_GOKU_ENGINE))
+	// 局面を与えて、その局面で思考させるために、やねうら王2018が必要。
+#if defined(EVAL_LEARN) && (defined(YANEURAOU_2018_OTAFUKU_ENGINE) || defined(YANEURAOU_2018_GOKU_ENGINE))
 
 	struct MultiThinkBook : public MultiThink
 	{
@@ -144,10 +144,10 @@ namespace Book
 		// 定跡の変換
 		bool convert_from_apery = token == "convert_from_apery";
 
-#if !(defined(EVAL_LEARN) && (defined(YANEURAOU_2017_EARLY_ENGINE) || defined(YANEURAOU_2017_GOKU_ENGINE)))
+#if !(defined(EVAL_LEARN) && (defined(YANEURAOU_2018_OTAFUKU_ENGINE) || defined(YANEURAOU_2018_GOKU_ENGINE)))
 		if (from_thinking)
 		{
-			cout << "Error!:define EVAL_LEARN and YANEURAOU_2017_EARLY_ENGINE/YANEURAOU_2017_GOKU_ENGINE " << endl;
+			cout << "Error!:define EVAL_LEARN and YANEURAOU_2018_OTAFUKU_ENGINE/YANEURAOU_2018_GOKU_ENGINE " << endl;
 			return;
 		}
 #endif
@@ -447,7 +447,7 @@ namespace Book
 			}
 			cout << "done." << endl;
 
-#if defined(EVAL_LEARN) && (defined(YANEURAOU_2017_EARLY_ENGINE) || defined(YANEURAOU_2017_GOKU_ENGINE))
+#if defined(EVAL_LEARN) && (defined(YANEURAOU_2018_OTAFUKU_ENGINE) || defined(YANEURAOU_2018_GOKU_ENGINE))
 
 			if (from_thinking)
 			{
@@ -1230,7 +1230,7 @@ namespace Book
 		o["NarrowBook"] << Option(false);
 
 		// 定跡の指し手を何手目まで用いるか
-		o["BookMoves"] << Option(16, 0, 10000);
+		o["BookMoves"] << Option(120, 0, 10000);
 
 		// 一定の確率で定跡を無視して自力で思考させる
 		o["BookIgnoreRate"] << Option(0, 0, 100);
@@ -1267,16 +1267,16 @@ namespace Book
 		//  BookEvalWhiteLimit : 同じく後手の下限。
 		//  BookDepthLimit : 定跡に登録されている指し手のdepthがこれを下回るなら採用しない。0を指定するとdepth無視。
 
-		o["BookEvalDiff"] << Option(30, 0, 99999);
+		o["BookEvalDiff"] << Option(0, 0, 99999);
 		o["BookEvalBlackLimit"] << Option(0, -99999, 99999);
-		o["BookEvalWhiteLimit"] << Option(-140, -99999, 99999);
-		o["BookDepthLimit"] << Option(16, 0, 99999);
+		o["BookEvalWhiteLimit"] << Option(0, -99999, 99999);
+		o["BookDepthLimit"] << Option(0, 0, 99999);
 
 		// 定跡をメモリに丸読みしないオプション。(default = false)
 		o["BookOnTheFly"] << Option(false);
 
 		// 定跡データベースの採択率に比例して指し手を選択するオプション
-		o["ConsiderBookMoveCount"] << Option(false);
+		o["ConsiderBookMoveCount"] << Option(true);
 
 	}
 
