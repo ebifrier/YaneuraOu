@@ -22,6 +22,9 @@ AlignedPtr<FeatureTransformer> feature_transformer;
 // 評価関数
 AlignedPtr<Network> network;
 
+// 読み込み済み評価関数のhash_value
+std::uint32_t loaded_hash_value = ~0;
+
 // 評価関数ファイル名
 const char* const kFileName = "nn.bin";
 
@@ -94,11 +97,12 @@ bool WriteHeader(std::ostream& stream,
 }
 
 // 評価関数パラメータを読み込む
-bool ReadParameters(std::istream& stream) {
-  std::uint32_t hash_value;
-  std::string architecture;
-  if (!ReadHeader(stream, &hash_value, &architecture)) return false;
-  if (hash_value != kHashValue) return false;
+bool ReadParameters(std::istream& stream, std::uint32_t *hash_value/*=nullptr*/) {
+  std::uint32_t hash_value_;
+  std::string architecture_;
+  if (!ReadHeader(stream, &hash_value_, &architecture_)) return false;
+  if (hash_value != nullptr) *hash_value = hash_value_;
+  if (hash_value_ != kHashValue) return false;
   if (!Detail::ReadParameters(stream, feature_transformer)) return false;
   if (!Detail::ReadParameters(stream, network)) return false;
   return stream && stream.peek() == std::ios::traits_type::eof();
@@ -223,13 +227,20 @@ void load_eval() {
     const std::string dir_name = Options["EvalDir"];
     const std::string file_name = path_combine(dir_name, NNUE::kFileName);
     std::ifstream stream(file_name, std::ios::binary);
-    const bool result = NNUE::ReadParameters(stream);
+    const bool result = NNUE::ReadParameters(stream, &NNUE::loaded_hash_value);
     ASSERT(result);
   }
 }
 
 // 初期化
 void init() {
+}
+
+u64 calc_check_sum() {
+	return (u64)NNUE::loaded_hash_value;
+}
+
+void print_softname(u64 check_sum) {
 }
 
 // 評価関数。差分計算ではなく全計算する。

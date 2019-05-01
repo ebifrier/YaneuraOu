@@ -2,9 +2,9 @@
 #ifndef GODWHALE_CHILD_VERSION_HPP
 #define GODWHALE_CHILD_VERSION_HPP
 
-#define SlaveName "GodwhaleChild-5.0.5"
+#define SlaveName "GodwhaleChild-6.0.0"
 
 constexpr int LoginNameMaxLength = 12;
-constexpr uint64_t EvalCheckSum = 0x00000d4a2143da16ULL;
+constexpr uint64_t EvalCheckSum = 1046128366;
 
 #endif

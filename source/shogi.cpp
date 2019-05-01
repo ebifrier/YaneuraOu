@@ -245,19 +245,6 @@ int main(int argc, char* argv[])
 		Options["Login_Name"] << USI::Option(loginName);
 		Options["Threads"] = argv[5];
 
-		// msys2+clangバージョンの時は評価関数の共有メモリを使わないようにする。
-#if defined(USE_SHARED_MEMORY_IN_EVAL) && defined(_WIN32)
-		Options["EvalShare"] << USI::Option(true);
-#endif
-
-// USE_SHARED_MEMORY_IN_EVAL && Linux Native
-#if defined(USE_SHARED_MEMORY_IN_EVAL) && !defined(_WIN32) && !defined(USE_MSYS2)
-		// mmapのコストはそこそこあるので1スレの時だけはテストとみなして共有メモリを使用
-		if(1 == (size_t)Options["Threads"]){
-			Options["EvalShare"] << USI::Option(true);
-		}
-#endif
-
 		IsGodwhaleMode = true;
 		start_godwhale_io(argv[2], argv[3]);
 		USI::loop(1, argv);

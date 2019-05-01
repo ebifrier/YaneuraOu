@@ -490,6 +490,7 @@ void is_ready(bool skipCorruptCheck)
 
 		// チェックサムの計算と保存(その後のメモリ破損のチェックのため)
 		eval_sum = Eval::calc_check_sum();
+		sync_cout << eval_sum << sync_endl;
 
 		// ソフト名の表示
 		Eval::print_softname(eval_sum);
