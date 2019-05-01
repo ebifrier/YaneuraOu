@@ -676,6 +676,9 @@
     <ClInclude Include="extra\macros.h" />
     <ClInclude Include="extra\mate\mate1ply.h" />
     <ClInclude Include="extra\thread_win32.h" />
+    <ClInclude Include="godwhale\asio_socket_streambuf.hpp" />
+    <ClInclude Include="godwhale\godwhale_io.hpp" />
+    <ClInclude Include="godwhale\version.hpp" />
     <ClInclude Include="learn\half_float.h" />
     <ClInclude Include="learn\learn.h" />
     <ClInclude Include="learn\learning_tools.h" />
@@ -734,6 +737,7 @@
     <ClCompile Include="extra\sfen_packer.cpp" />
     <ClCompile Include="extra\test_cmd.cpp" />
     <ClCompile Include="extra\timeman.cpp" />
+    <ClCompile Include="godwhale\godwhale_io.cpp" />
     <ClCompile Include="learn\learner.cpp" />
     <ClCompile Include="learn\learning_tools.cpp" />
     <ClCompile Include="learn\multi_think.cpp" />
