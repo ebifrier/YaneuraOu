@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_CXX_COMPILER "clang++")
 add_definitions("-std=c++14 -fno-exceptions -fno-rtti -Wextra -Ofast -MMD -MP")
-add_definitions("-Wno-unused-parameter -D_LINUX -DGODWHALE_CLUSTER_SLAVE -DUSE_CMAKE")
+add_definitions("-Wno-unused-parameter -DDUNICODE -D_LINUX -DNO_EXCEPTIONS -DGODWHALE_CLUSTER_SLAVE -DUSE_CMAKE")
 set(CMAKE_EXE_LINKER_FLAGS "-v")
 
 if(NOT DEFINED target)
