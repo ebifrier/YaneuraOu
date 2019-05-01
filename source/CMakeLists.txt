@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_CXX_COMPILER "clang++")
-add_definitions("-std=c++14 -fno-exceptions -fno-rtti -Wextra -Ofast -MMD -MP")
-add_definitions("-Wno-unused-parameter -DUNICODE -D_LINUX -DNO_EXCEPTIONS -DGODWHALE_CLUSTER_SLAVE -DUSE_CMAKE")
+add_definitions("-std=c++14 -fno-exceptions -fno-rtti -Wextra -Ofast -MMD -MP -Wno-unused-parameter")
+add_definitions("-DUNICODE -D_LINUX -DNO_EXCEPTIONS -DYANEURAOU_2018_TNK_ENGINE -DGODWHALE_CLUSTER_SLAVE -DUSE_MAKEFILE")
 set(CMAKE_EXE_LINKER_FLAGS "-v")
 
 if(NOT DEFINED target)
@@ -63,6 +63,13 @@ set(sources
 	eval/evaluate.cpp
 	eval/evaluate_io.cpp
 	eval/evaluate_mir_inv_tools.cpp
+	eval/nnue/evaluate_nnue.cpp
+	eval/nnue/evaluate_nnue_learner.cpp
+	eval/nnue/nnue_test_command.cpp
+	eval/nnue/features/k.cpp
+	eval/nnue/features/p.cpp
+	eval/nnue/features/half_kp.cpp
+	eval/nnue/features/half_relative_kp.cpp
 	engine/user-engine/user-search.cpp
 	engine/help-mate-engine/help-mate-search.cpp
 	engine/2018-otafuku-engine/2018-otafuku-search.cpp
