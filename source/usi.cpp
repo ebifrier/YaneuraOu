@@ -175,7 +175,6 @@ namespace USI
 #if defined(GODWHALE_CLUSTER_SLAVE)
                 << (IsGodwhaleMode ? " id " + std::to_string(pos.id) : "")
 #endif
-				<< " depth "    << d
 				<< " depth "    << d / ONE_PLY
 				<< " seldepth " << rootMoves[i].selDepth
 				<< " score "    << USI::score_to_usi(v);
