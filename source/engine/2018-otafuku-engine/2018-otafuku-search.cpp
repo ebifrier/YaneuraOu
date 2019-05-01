@@ -83,7 +83,7 @@ void USI::extra_option(USI::OptionsMap & o)
 
 
 	// 投了スコア
-	o["ResignValue"] << Option(3000, 0, 99999);
+	o["ResignValue"] << Option(99999, 0, 99999);
 
 	// nodes as timeモード。
 	// ミリ秒あたりのノード数を設定する。goコマンドでbtimeが、ここで設定した値に掛け算されたノード数を探索の上限とする。
