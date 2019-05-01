@@ -52,7 +52,7 @@ bool WriteHeader(std::ostream& stream,
     std::uint32_t hash_value, const std::string& architecture);
 
 // 評価関数パラメータを読み込む
-bool ReadParameters(std::istream& stream);
+bool ReadParameters(std::istream& stream, std::uint32_t *hash_value = nullptr);
 
 // 評価関数パラメータを書き込む
 bool WriteParameters(std::ostream& stream);

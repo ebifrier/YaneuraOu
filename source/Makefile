@@ -20,30 +20,30 @@ INCLUDE  = # -I../include
 
 # clang用にCFLAGSなどを変更
 ifeq ($(findstring clang++,$(COMPILER)),clang++)
-	# stdlib
-	CFLAGS += -stdlib=libstdc++
+    # stdlib
+    CFLAGS += -stdlib=libstdc++
 
-	# 関数の引数が関数本体で使われていないときに警告出るのうざすぎるので抑制。
-	CFLAGS += -Wno-unused-parameter
+    # 関数の引数が関数本体で使われていないときに警告出るのうざすぎるので抑制。
+    CFLAGS += -Wno-unused-parameter
 
-	# static リンクを行う際に __cxa_guard_acquire __cxa_guard_release の生成を抑止
-	#   undefined reference to `__imp___cxa_guard_acquire'
-	#   undefined reference to `__imp___cxa_guard_release'
-	# static 変数を初期化したかを pthread_mutex_t でロックを取って確認し、
-	# 最初の実行なら初期化するスレッドセーフなコードを生成するためのもの。
-	# → 本当に消してしまっても大丈夫か？
-	WCFLAGS += -fno-threadsafe-statics
+    # static リンクを行う際に __cxa_guard_acquire __cxa_guard_release の生成を抑止
+    #   undefined reference to `__imp___cxa_guard_acquire'
+    #   undefined reference to `__imp___cxa_guard_release'
+    # static 変数を初期化したかを pthread_mutex_t でロックを取って確認し、
+    # 最初の実行なら初期化するスレッドセーフなコードを生成するためのもの。
+    # → 本当に消してしまっても大丈夫か？
+    WCFLAGS += -fno-threadsafe-statics
 
-	# msys2用のclangでは、OpenMP使えない？インスコ仕方がわからん。
+    # msys2用のclangでは、OpenMP使えない？インスコ仕方がわからん。
 endif
 
 ifeq ($(OS),Windows_NT)
-  CFLAGS += $(WCFLAGS)
-  LDFLAGS += -static -Wl,--stack,100000000
-  TARGET = FF2-1014.exe
+    CFLAGS += $(WCFLAGS)
+    LDFLAGS += -static -Wl,--stack,100000000
+    TARGET = FF2-1014.exe
 else
-	CFLAGS += -D_LINUX -DGODWHALE_CLUSTER_SLAVE
-	TARGET = godwhale_child
+    CFLAGS += -D_LINUX -DGODWHALE_CLUSTER_SLAVE
+    TARGET = godwhale_child
 endif
 
 # リンク時最適化。これをつけるとmsys2環境だとセグフォで落ちる。
@@ -88,7 +88,7 @@ LDFLAGS += -v
 
 OBJDIR   = ../obj
 ifeq "$(strip $(OBJDIR))" ""
-	OBJDIR = ..
+        OBJDIR = ..
 endif
 #SOURCES  = $(wildcard *.cpp)
 SOURCES  = shogi.cpp                                                           \
