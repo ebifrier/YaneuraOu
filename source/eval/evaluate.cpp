@@ -75,7 +75,6 @@ namespace Eval
 			{ 0x0000d6799926233 , "ShinYane(20161010)"    } , // 真やねうら王 = やねうら王(2016)
 			{ 0x0000da0f36d1b4b , "Apery(WCSC26)"         } , // Apery(WCSC26)
 			{ 0x0000d7213c45779 , "Ukamuse(sdt4)"         } , // 浮かむ瀬     = Apery(sdt4)
-            { 0x0000cc200376c52 , "Apery(sdt5)"           } , // Apery sdt5
 
 			{ 0x0000c9e81cef72b , "elmo(WCSC27)"          } , // elmo(WCSC27)
 			{ 0x0000900f1fbe7a6 , "Yomita(WCSC27)"        } , // 読み太(WCSC27)   
@@ -98,12 +97,8 @@ namespace Eval
 			{ 0x0000c8e89414b88 , "elmoqhapaq ver1.0"     } , // elmo-qhapaq version 1.0
 			{ 0x0000c8ac0b10c78 , "elmoqhapaq ver1.1"     } , // elmo-qhapaq version 1.1
 
-            { 0x0000d51b9031805 , "qzilla7"               } , // qzilla7
-            { 0x0000d4a2143da16 , "qzilla9"               } , // qzilla9
-
 			{ 0x0000c62cf4f6b91 , "relmo8"                } , // リゼロ評価関数epoch8とelmo(WCSC27)を1:1でブレンド
 			{ 0x0000c85005252ee , "yaselmo(20170705)"     } , // 野生の読み太(20170703)とelmo(WCSC27)を1:1でブレンド
-            { 0x0000cdfb3ca11fc , "mafu(20171101)"        } , // マフさん作成評価関数
 
 			// KPP_KKPT型
 			{ 0x0000574a685513c , "kppkkpt rezero epoch4" } , // KPP_KKPT型リゼロ評価関数epoch4

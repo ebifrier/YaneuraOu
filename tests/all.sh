@@ -10,24 +10,20 @@ echo "testing started"
 pwd
 
 echo "eval data downloading.."
-wget --load-cookies /tmp/cookies.txt \
-  `wget --keep-session-cookies --save-cookies=/tmp/cookies.txt \
-    'https://drive.google.com/uc?id=1r4o85v6_wxQhIF4K7sAuCfuLzTxIJLJ-' -q -O - \
-    | perl -nle 'if($_=~/download-link.*?href="(.*?)"/i){$str=$1;$str=~s/&amp;/&/g;print "https://drive.google.com$str";}'` \
-      -O qzilla7.7z > /dev/null 2>&1
+wget "https://drive.google.com/uc?export=download&id=182H3qNkEerRtrvheN85t-UDkP0FyYt9J" -O qzilla_nn.7z
 if [ $? != 0 ]; then
   echo "testing failed(wget)"
   exit 1
 fi
 
 echo "eval data unzip.."
-7z x qzilla7.7z
+7z x qzilla_nn.7z
 if [ $? != 0 ]; then
   echo "testing failed(7z x)"
   exit 1
 fi
 
-mv qzilla7 eval
+mv qzilla_nn eval
 
 echo "loading eval.bin.."
 cat eval/*.bin > /dev/null 2>&1

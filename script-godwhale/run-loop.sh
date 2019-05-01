@@ -15,6 +15,6 @@ fi
 
 while :
 do
-    ./godwhale_child "$host" "$port" "$loginName" "$threadSize"
+    ./godwhale_child godwhale "$host" "$port" "$loginName" "$threadSize"
     sleep 10
 done
