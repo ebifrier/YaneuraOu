@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_CXX_COMPILER "clang++")
 add_definitions("-std=c++14 -fno-exceptions -fno-rtti -Wextra -Ofast -MMD -MP -Wno-unused-parameter")
-add_definitions("-DUNICODE -D_LINUX -DNO_EXCEPTIONS -DYANEURAOU_2018_TNK_ENGINE -DGODWHALE_CLUSTER_SLAVE -DUSE_MAKEFILE")
+add_definitions("-DUNICODE -D_LINUX -DNO_EXCEPTIONS -DUSE_MAKEFILE")
+add_definitions("-DYANEURAOU_2018_TNK_ENGINE -DGODWHALE_CLUSTER_SLAVE")
 set(CMAKE_EXE_LINKER_FLAGS "-v")
 
 if(NOT DEFINED target)
@@ -17,7 +18,7 @@ elseif(DEFINED target)
 endif()
 
 if (NOT "$ENV{MSYSTEM}" STREQUAL "")
-  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,100000000")
+  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,100000000 -Wl,-s -flto -v")
   add_definitions("-fno-threadsafe-statics -DUSE_MSYS2 -DBOOST_USE_WINDOWS_H -DBOOST_ERROR_CODE_HEADER_ONLY")
 endif()
 
