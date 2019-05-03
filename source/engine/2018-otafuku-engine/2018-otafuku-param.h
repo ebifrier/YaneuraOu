@@ -16,30 +16,30 @@
 // depth手先で評価値が変動する幅が = depth * (PARAM_FUTILITY_MARGIN_ALPHA1 - improving*PARAM_FUTILITY_MARGIN_ALPHA2)
 // 元の値 = 175
 // [PARAM] min:100,max:240,step:2,interval:1,time_rate:1,fixed
-PARAM_DEFINE PARAM_FUTILITY_MARGIN_ALPHA1 = 175;
+PARAM_DEFINE PARAM_FUTILITY_MARGIN_ALPHA1 = 500;
 
 // 元の値 = 50
 // [PARAM] min:25,max:100,step:2,interval:1,time_rate:1,fixed
-PARAM_DEFINE PARAM_FUTILITY_MARGIN_ALPHA2 = 77;
+PARAM_DEFINE PARAM_FUTILITY_MARGIN_ALPHA2 = 400;
 
 
 // 
 
 // 元の値 = 200
 // [PARAM] min:100,max:240,step:2,interval:1,time_rate:1,fixed
-PARAM_DEFINE PARAM_FUTILITY_MARGIN_BETA = 220;
+PARAM_DEFINE PARAM_FUTILITY_MARGIN_BETA = 500;
 
 
 // 静止探索でのfutility pruning
 // 元の値 = 128
 // [PARAM] min:50,max:160,step:5,interval:1,time_rate:1,fixed
-PARAM_DEFINE PARAM_FUTILITY_MARGIN_QUIET = 128;
+PARAM_DEFINE PARAM_FUTILITY_MARGIN_QUIET = 500;
 
 // futility pruningの適用depth。
 // この制限自体が要らない可能性がある。→　そうでもなかった。
 // 元の値 = 7
 // [PARAM] min:5,max:15,step:1,interval:1,time_rate:1,fixed
-PARAM_DEFINE PARAM_FUTILITY_RETURN_DEPTH = 6;
+PARAM_DEFINE PARAM_FUTILITY_RETURN_DEPTH = 7;
 
 // 親nodeでのfutilityの適用depth。
 // この枝刈り、depthの制限自体が要らないような気がする。→　そうでもなかった。
