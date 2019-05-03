@@ -4,19 +4,20 @@ echo "download started"
 pwd
 
 echo "eval data downloading.."
-wget "https://drive.google.com/uc?export=download&id=182H3qNkEerRtrvheN85t-UDkP0FyYt9J" -O qzilla_nn.7z
+wget "https://drive.google.com/uc?export=download&id=1NV6SK9kAZ7xKD8SFXPSY81DyzaiajBXJ" -O qzilla_nn.zip
 if [ $? != 0 ]; then
   echo "download failed(wget)"
   exit 1
 fi
 
 echo "eval data unzip.."
-7z x qzilla_nn.7z
+unzip qzilla_nn.zip
 if [ $? != 0 ]; then
-  echo "download failed(7z x)"
+  echo "download failed(unzip)"
   exit 1
 fi
 
+rm -rf eval
 mv qzilla_nn eval
 
 echo "loading eval.bin.."
